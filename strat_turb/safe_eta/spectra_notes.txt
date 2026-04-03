@@ -1,0 +1,26 @@
+The horizontal spectra files are written to columns in the following order, 
+1 : k_x
+2 : k_y
+3 : E(u_x)
+4 : E(u_y)
+5 : E(u_z)
+6 : E(u)
+7 : E(B_x)
+8 : E(B_y)
+9 : E(B_z)
+10: E(B)
+11: E(Temp)
+12: E(Chem)
+
+The vertical spectra files are written to columns in the following order, 
+1 : k_z
+2 : E(u_x)
+3 : E(u_y)
+4 : E(u_z)
+5 : E(u)
+6 : E(B_x)
+7 : E(B_y)
+8 : E(B_z)
+9 : E(B)
+10: E(Temp)
+11: E(Chem)
