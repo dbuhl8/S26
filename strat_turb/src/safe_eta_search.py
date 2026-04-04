@@ -11,16 +11,20 @@ stochastic = True  # True for stochastic forcing sims, False for steady sims
 
 if stochastic:
     if testing:
-        # only run this code on a single simulation set to ensure accuracy of code
+        # only run this code on a single simulation set
+        # to ensure accuracy of code
         Re600_Pe60=['nonrotating/B300Re600Pe60/']
         Re600_Pe60_bounds=[[40,80]]
 
         simulations = [Re600_Pe60]
         bounds = [Re600_Pe60_bounds]
     else:
-        Re600_Pe60=['B300Re600Pe60/','B180Re600Pe60/','B100Re600Pe60/','B30Re600Pe60/',\
-                    'B10Re600Pe60/','B3Re600Pe60/','B1Re600Pe60/']
-        Re1000_Pe100 = ['B100Re1000Pe100/', 'B10Re1000Pe100/']
+        Re600_Pe60=['nonrotating/B300Re600Pe60/','nonrotating/B180Re600Pe60/',\
+                    'nonrotating/B100Re600Pe60/','nonrotating/B30Re600Pe60/',\
+                    'nonrotating/B10Re600Pe60/','nonrotating/B3Re600Pe60/',\
+                    'nonrotating/B1Re600Pe60/']
+        Re1000_Pe100 = ['nonrotating/B100Re1000Pe100/',\
+                        'nonrotating/B10Re1000Pe100/']
 
         Re600_Pe60_bounds=[[40,80],[40,90],[45,160],\
             [35,80],[50,250],[55,110],[45,125]]
@@ -34,7 +38,8 @@ if stochastic:
 
 else:  # steady forcing sims
     if testing:
-        # only run this code on a single simulation set to ensure accuracy of code
+        # only run this code on a single simulation set
+        # to ensure accuracy of code
         Re600_Pe60=['horizontal-shear/Re600_Pe60_B100/']
         Re600_Pe60_bounds=[[150,300]]
 
@@ -93,10 +98,10 @@ else:  # steady forcing sims
     tavg_filename = 'steady_tavg_eta.dat'
 
 # preparing output file
-header_string = "#" + "{:<s}    "*36
-tavg_header_string = "#" + "{:<s}    "*71
-fmt_str = "{:.4e}    "*36
-tavg_fmt_str = "{:.4e}    "*71
+header_string = "#" + "{:<s}    "*43
+tavg_header_string = "#" + "{:<s}    "*85
+fmt_str = "{:.4e}    "*43
+tavg_fmt_str = "{:.4e}    "*85
 # 20 columns
 header_string = header_string.format('Re','B','Pr', 'Pe', 'BPe', 't', 'uh_rms',\
     'vortz_rms', 'wrms',\
@@ -110,7 +115,10 @@ header_string = header_string.format('Re','B','Pr', 'Pe', 'BPe', 't', 'uh_rms',\
     'lam wrms eff wght', 'turb wrms eff wght',\
     'trms', 'lam trms', 'turb trms',\
     'lam trms wght', 'turb trms wght',\
-    'lam trms eff wght', 'turb trms eff wght')
+    'lam trms eff wght', 'turb trms eff wght',\
+    'bflux', 'lam bflux', 'turb bflux',\
+    'lam bflux wght', 'turb bflux wght',\
+    'lam bflux eff wght', 'turb bflux eff wght')
 tavg_header_string = tavg_header_string.format('Re','B','Pr', 'Pe', 'BPe',\
     'lb','ub','uh_rms','uh_err','vortz_rms', 'vortz err','wrms','wrms err',\
     'tdisp','tdisp_err', 'mdisp','mdisp_err',\
@@ -134,7 +142,14 @@ tavg_header_string = tavg_header_string.format('Re','B','Pr', 'Pe', 'BPe',\
     'lam trms wght', 'lam trms wght err',\
     'turb trms wght', 'turb trms wght err',\
     'lam trms eff wght', 'lam trms eff wght err',\
-    'turb trms eff wght', 'turb trms eff wght err')
+    'turb trms eff wght', 'turb trms eff wght err',\
+    'bflux', 'bflux err',\
+    'lam bflux', 'lam bflux err',\
+    'turb bflux', 'turb bflux err',\
+    'lam bflux wght', 'lam bflux wght err',\
+    'turb bflux wght', 'turb bflux wght err',\
+    'lam bflux eff wght', 'lam bflux eff wght err',\
+    'turb bflux eff wght', 'turb bflux eff wght err')
 
 io_file = open(io_filename,'w')
 tavg_file = open(tavg_filename,'w')
@@ -142,6 +157,73 @@ io_file.write(header_string)
 tavg_file.write(tavg_header_string)
 io_file.write('\n')
 tavg_file.write('\n')
+
+# write column key file
+key_filename = io_filename.replace('.dat', '_column_key.txt')
+with open(key_filename, 'w') as key_file:
+    io_cols = [
+        'Re', 'B', 'Pr', 'Pe', 'BPe', 't', 'uh_rms',
+        'vortz_rms', 'wrms',
+        'tdisp', 'mdisp', 'eta (local)', 'eta (global)',
+        'lam wrms', 'lam tdisp', 'lam mdisp',
+        'lam eta (local)', 'lam eta (global)',
+        'turb wrms', 'turb tdisp', 'turb mdisp',
+        'turb eta (local)', 'turb eta (global)',
+        'vlam', 'vturb',
+        'lam wrms wght', 'turb wrms wght',
+        'lam wrms eff wght', 'turb wrms eff wght',
+        'trms', 'lam trms', 'turb trms',
+        'lam trms wght', 'turb trms wght',
+        'lam trms eff wght', 'turb trms eff wght',
+        'bflux', 'lam bflux', 'turb bflux',
+        'lam bflux wght', 'turb bflux wght',
+        'lam bflux eff wght', 'turb bflux eff wght']
+
+    tavg_cols = [
+        'Re', 'B', 'Pr', 'Pe', 'BPe',
+        'lb', 'ub', 'uh_rms', 'uh_err', 'vortz_rms', 'vortz err',
+        'wrms', 'wrms err',
+        'tdisp', 'tdisp_err', 'mdisp', 'mdisp_err',
+        'eta (local)', 'eta (local) err', 'eta (global)', 'eta (global) err',
+        'lam wrms', 'lam wrms err',
+        'lam tdisp', 'lam tdisp err', 'lam mdisp', 'lam mdisp err',
+        'lam eta (local)', 'lam eta (local) err',
+        'lam eta (global)', 'lam eta (global) err',
+        'turb wrms', 'turb wrms err',
+        'turb tdisp', 'turb tdisp err', 'turb mdisp', 'turb mdisp err',
+        'turb eta (local)', 'turb eta (local) err',
+        'turb eta (global)', 'turb eta (global) err',
+        'vlam avg', 'vlam err', 'vturb avg', 'vturb err',
+        'lam wrms wght', 'lam wrms wght err',
+        'turb wrms wght', 'turb wrms wght err',
+        'lam wrms eff wght', 'lam wrms eff wght err',
+        'turb wrms eff wght', 'turb wrms eff wght err',
+        'trms', 'trms err',
+        'lam trms', 'lam trms err',
+        'turb trms', 'turb trms err',
+        'lam trms wght', 'lam trms wght err',
+        'turb trms wght', 'turb trms wght err',
+        'lam trms eff wght', 'lam trms eff wght err',
+        'turb trms eff wght', 'turb trms eff wght err',
+        'bflux', 'bflux err',
+        'lam bflux', 'lam bflux err',
+        'turb bflux', 'turb bflux err',
+        'lam bflux wght', 'lam bflux wght err',
+        'turb bflux wght', 'turb bflux wght err',
+        'lam bflux eff wght', 'lam bflux eff wght err',
+        'turb bflux eff wght', 'turb bflux eff wght err']
+
+    key_file.write('Column key for: {}\n'.format(io_filename))
+    key_file.write(
+        '(timeseries output — one row per timestep per simulation)\n\n')
+    for i, name in enumerate(io_cols):
+        key_file.write('  Col {:3d}: {}\n'.format(i + 1, name))
+
+    key_file.write('\n')
+    key_file.write('Column key for: {}\n'.format(tavg_filename))
+    key_file.write('(time-averaged output — one row per simulation)\n\n')
+    for i, name in enumerate(tavg_cols):
+        key_file.write('  Col {:3d}: {}\n'.format(i + 1, name))
 
 index_counter = 0
 
@@ -180,6 +262,15 @@ for m, sim_set in enumerate(simulations):
         avg_lam_trms_eff_wght = np.array([])
         avg_turb_trms_wght = np.array([])
         avg_turb_trms_eff_wght = np.array([])
+
+        avg_bflux = np.array([])
+        avg_lam_bflux = np.array([])
+        avg_turb_bflux = np.array([])
+
+        avg_lam_bflux_wght = np.array([])
+        avg_lam_bflux_eff_wght = np.array([])
+        avg_turb_bflux_wght = np.array([])
+        avg_turb_bflux_eff_wght = np.array([])
 
         avg_tdisp = np.array([])
         avg_lam_tdisp = np.array([])
@@ -320,6 +411,31 @@ for m, sim_set in enumerate(simulations):
                 avg_turb_trms_eff_wght = np.append(avg_turb_trms_eff_wght,\
                     avg_turb_trms_wght[-1]/uh_rms[-1])
 
+                # computing buoyancy flux (temp * w)
+                bflux_i = trms[i,:,:,:] * wrms[i,:,:,:]
+                avg_bflux = np.append(avg_bflux,\
+                    db.rms(bflux_i))
+                avg_lam_bflux = np.append(avg_lam_bflux,\
+                    db.rms(bflux_i[\
+                    idx_lam[0],idx_lam[1],idx_lam[2]]))
+                avg_turb_bflux = np.append(avg_turb_bflux,\
+                    db.rms(bflux_i[\
+                    idx_turb[0],idx_turb[1],idx_turb[2]]))
+
+                avg_lam_bflux_wght = np.append(avg_lam_bflux_wght,\
+                    np.sqrt(np.sum(bflux_i**2/\
+                    np.maximum(vortz[i,:,:,:]**2,eps))\
+                    /np_tot)/vortz_inv_rms)
+                avg_turb_bflux_wght = np.append(avg_turb_bflux_wght,\
+                    db.rms(bflux_i*vortz[i,:,:,:])\
+                    /vortz_rms[-1])
+                avg_lam_bflux_eff_wght = np.append(\
+                    avg_lam_bflux_eff_wght,\
+                    avg_lam_bflux_wght[-1]/uh_rms[-1])
+                avg_turb_bflux_eff_wght = np.append(\
+                    avg_turb_bflux_eff_wght,\
+                    avg_turb_bflux_wght[-1]/uh_rms[-1])
+
                 # computing avg tdisp and mdisp, NOTE that TDISP and MDisp do
                 # not need to be sqrt_ed, so we use the mean() function
                 avg_tdisp = np.append(avg_tdisp,db.mean(tdisp[i,:,:,:]))
@@ -381,6 +497,15 @@ for m, sim_set in enumerate(simulations):
         avg_turb_trms_wght = avg_turb_trms_wght[indices]
         avg_turb_trms_eff_wght = avg_turb_trms_eff_wght[indices]
 
+        avg_bflux = avg_bflux[indices]
+        avg_lam_bflux = avg_lam_bflux[indices]
+        avg_turb_bflux = avg_turb_bflux[indices]
+
+        avg_lam_bflux_wght = avg_lam_bflux_wght[indices]
+        avg_lam_bflux_eff_wght = avg_lam_bflux_eff_wght[indices]
+        avg_turb_bflux_wght = avg_turb_bflux_wght[indices]
+        avg_turb_bflux_eff_wght = avg_turb_bflux_eff_wght[indices]
+
         avg_tdisp = avg_tdisp[indices]
         avg_lam_tdisp = avg_lam_tdisp[indices]
         avg_turb_tdisp = avg_turb_tdisp[indices]
@@ -424,6 +549,10 @@ for m, sim_set in enumerate(simulations):
             avg_lam_trms[i],avg_turb_trms[i],\
             avg_lam_trms_wght[i],avg_turb_trms_wght[i],\
             avg_lam_trms_eff_wght[i],avg_turb_trms_eff_wght[i],\
+            avg_bflux[i],\
+            avg_lam_bflux[i],avg_turb_bflux[i],\
+            avg_lam_bflux_wght[i],avg_turb_bflux_wght[i],\
+            avg_lam_bflux_eff_wght[i],avg_turb_bflux_eff_wght[i],\
             ))
             io_file.write('\n')
 
@@ -441,7 +570,8 @@ for m, sim_set in enumerate(simulations):
             vturb, tidx)
 
         avg_lam_wrms_wght, err_lam_wrms_wght = db.tavg(avg_lam_wrms_wght, tidx)
-        avg_turb_wrms_wght, err_turb_wrms_wght = db.tavg(avg_turb_wrms_wght, tidx)
+        avg_turb_wrms_wght, err_turb_wrms_wght = \
+            db.tavg(avg_turb_wrms_wght, tidx)
         avg_lam_wrms_eff_wght, err_lam_wrms_eff_wght = \
             db.tavg(avg_lam_wrms_eff_wght, tidx)
         avg_turb_wrms_eff_wght, err_turb_wrms_eff_wght = \
@@ -449,39 +579,62 @@ for m, sim_set in enumerate(simulations):
 
         # TRMS
         avg_trms, err_trms = db.tavg(avg_trms, tidx)
-        avg_lam_trms, err_lam_trms = db.discounted_tavg(avg_lam_trms, vlam, tidx)
-        avg_turb_trms, err_turb_trms = db.discounted_tavg(avg_turb_trms, vturb, tidx)
+        avg_lam_trms, err_lam_trms = \
+            db.discounted_tavg(avg_lam_trms, vlam, tidx)
+        avg_turb_trms, err_turb_trms = \
+            db.discounted_tavg(avg_turb_trms, vturb, tidx)
 
         avg_lam_trms_wght, err_lam_trms_wght = db.tavg(avg_lam_trms_wght, tidx)
-        avg_turb_trms_wght, err_turb_trms_wght = db.tavg(avg_turb_trms_wght, tidx)
+        avg_turb_trms_wght, err_turb_trms_wght = \
+            db.tavg(avg_turb_trms_wght, tidx)
         avg_lam_trms_eff_wght, err_lam_trms_eff_wght = \
             db.tavg(avg_lam_trms_eff_wght, tidx)
         avg_turb_trms_eff_wght, err_turb_trms_eff_wght = \
             db.tavg(avg_turb_trms_eff_wght, tidx)
 
+        # BFLUX
+        avg_bflux, err_bflux = db.tavg(avg_bflux, tidx)
+        avg_lam_bflux, err_lam_bflux = \
+            db.discounted_tavg(avg_lam_bflux, vlam, tidx)
+        avg_turb_bflux, err_turb_bflux = \
+            db.discounted_tavg(avg_turb_bflux, vturb, tidx)
+
+        avg_lam_bflux_wght, err_lam_bflux_wght = \
+            db.tavg(avg_lam_bflux_wght, tidx)
+        avg_turb_bflux_wght, err_turb_bflux_wght = \
+            db.tavg(avg_turb_bflux_wght, tidx)
+        avg_lam_bflux_eff_wght, err_lam_bflux_eff_wght = \
+            db.tavg(avg_lam_bflux_eff_wght, tidx)
+        avg_turb_bflux_eff_wght, err_turb_bflux_eff_wght = \
+            db.tavg(avg_turb_bflux_eff_wght, tidx)
+
         # TDISP
         avg_tdisp, err_tdisp = db.tavg(avg_tdisp, tidx)
-        avg_lam_tdisp, err_lam_tdisp = db.discounted_tavg(avg_lam_tdisp, vlam, tidx)
-        avg_turb_tdisp, err_turb_tdisp = db.discounted_tavg(avg_turb_tdisp, vturb, tidx)
+        avg_lam_tdisp, err_lam_tdisp = \
+            db.discounted_tavg(avg_lam_tdisp, vlam, tidx)
+        avg_turb_tdisp, err_turb_tdisp = \
+            db.discounted_tavg(avg_turb_tdisp, vturb, tidx)
 
         # MDISP
         avg_mdisp, err_mdisp = db.tavg(avg_mdisp, tidx)
-        avg_lam_mdisp, err_lam_mdisp = db.discounted_tavg(avg_lam_mdisp, vlam, tidx)
-        avg_turb_mdisp, err_turb_mdisp = db.discounted_tavg(avg_turb_mdisp, vturb, tidx)
+        avg_lam_mdisp, err_lam_mdisp = \
+            db.discounted_tavg(avg_lam_mdisp, vlam, tidx)
+        avg_turb_mdisp, err_turb_mdisp = \
+            db.discounted_tavg(avg_turb_mdisp, vturb, tidx)
 
         # Locally computed ETA
         avg_local_eta, err_local_eta = db.tavg(avg_local_eta, tidx)
-        avg_local_lam_eta, err_local_lam_eta = db.discounted_tavg(avg_local_lam_eta,\
-            vlam, tidx)
-        avg_local_turb_eta, err_local_turb_eta = db.discounted_tavg(avg_local_turb_eta,\
-            vturb, tidx)
+        avg_local_lam_eta, err_local_lam_eta = \
+            db.discounted_tavg(avg_local_lam_eta, vlam, tidx)
+        avg_local_turb_eta, err_local_turb_eta = \
+            db.discounted_tavg(avg_local_turb_eta, vturb, tidx)
 
         # Globally Computed ETA
         avg_global_eta, err_global_eta = db.tavg(avg_global_eta, tidx)
-        avg_global_lam_eta, err_global_lam_eta = db.discounted_tavg(avg_global_lam_eta,\
-            vlam, tidx)
-        avg_global_turb_eta, err_global_turb_eta = db.discounted_tavg(avg_global_turb_eta,\
-            vturb, tidx)
+        avg_global_lam_eta, err_global_lam_eta = \
+            db.discounted_tavg(avg_global_lam_eta, vlam, tidx)
+        avg_global_turb_eta, err_global_turb_eta = \
+            db.discounted_tavg(avg_global_turb_eta, vturb, tidx)
 
         # Volume Fractions
         vlam_avg, vlam_err = db.tavg(vlam, tidx)
@@ -511,7 +664,14 @@ for m, sim_set in enumerate(simulations):
             avg_lam_trms_wght,err_lam_trms_wght,\
             avg_turb_trms_wght,err_turb_trms_wght,\
             avg_lam_trms_eff_wght,err_lam_trms_eff_wght,\
-            avg_turb_trms_eff_wght,err_turb_trms_eff_wght))
+            avg_turb_trms_eff_wght,err_turb_trms_eff_wght,\
+            avg_bflux,err_bflux,\
+            avg_lam_bflux,err_lam_bflux,\
+            avg_turb_bflux,err_turb_bflux,\
+            avg_lam_bflux_wght,err_lam_bflux_wght,\
+            avg_turb_bflux_wght,err_turb_bflux_wght,\
+            avg_lam_bflux_eff_wght,err_lam_bflux_eff_wght,\
+            avg_turb_bflux_eff_wght,err_turb_bflux_eff_wght))
         tavg_file.write('\n')
         io_file.write('\n\n\n')
     io_file.write('\n\n\n')
