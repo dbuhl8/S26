@@ -6,8 +6,8 @@ from netCDF4 import MFDataset
 from netCDF4 import Dataset
 
 
-testing = True
-stochastic = True  # True for stochastic forcing sims, False for steady sims
+testing = False
+stochastic = False  # True for stochastic forcing sims, False for steady sims
 
 if stochastic:
     if testing:
@@ -46,15 +46,15 @@ else:  # steady forcing sims
         simulations = [Re600_Pe60]
         bounds = [Re600_Pe60_bounds]
     else:
-        Re600_Pe60=['horizontal-shear/Re600_Pe60_B100/',\
-                    'horizontal-shear/Re600_Pe60_B0.1/',\
-                    'horizontal-shear/Re600_Pe60_B1/',\
-                    'horizontal-shear/Re600_Pe60_B10/',\
+        Re600_Pe60=['horizontal-shear/Re600_Pe60_B0.1/',\
                     'horizontal-shear/Re600_Pe60_B1000/',\
-                    'horizontal-shear/Re600_Pe60_B30/',\
                     'horizontal-shear/Re600_Pe60_B3000/',\
                     'horizontal-shear/Re600_Pe60_B400/',\
                     'horizontal-shear/Re600_Pe60_B6000/']
+                    #'horizontal-shear/Re600_Pe60_B100/',\
+                    #'horizontal-shear/Re600_Pe60_B1/',\
+                    #'horizontal-shear/Re600_Pe60_B10/',\
+                    #'horizontal-shear/Re600_Pe60_B30/',\
         Re600_Pe60_bounds=[[150,300],[275,400],[180,320],\
             [220,450],[500,900],[375,560],[650,900],\
             [225,460],[40,180]]
@@ -83,10 +83,10 @@ else:  # steady forcing sims
         Re300_Pe30_bounds=[[370,460],[260,460],[140,280],[60,160],\
             [300,1200],[800,1300],[1050,1450],[50,300],[300,900]]
 
-        Re1000_Pe10=['horizontal-shear/Re1000_Pe10_B10/',\
+        Re1000_Pe10=['horizontal-shear/Re1000_Pe10_B3/',\
                      'horizontal-shear/Re1000_Pe10_B100/',\
-                     'horizontal-shear/Re1000_Pe10_B1000/',\
-                     'horizontal-shear/Re1000_Pe10_B3/']
+                     'horizontal-shear/Re1000_Pe10_B1000/']
+                     #'horizontal-shear/Re1000_Pe10_B10/',\
         Re1000_Pe10_bounds=[[35,40],[35,70],[94,95],[62,63]]
 
         simulations = [Re600_Pe60, Re600_Pe30, Re1000_Pe100, Re300_Pe30,\
@@ -99,9 +99,9 @@ else:  # steady forcing sims
 
 # preparing output file
 header_string = "#" + "{:<s}    "*43
-tavg_header_string = "#" + "{:<s}    "*85
+tavg_header_string = "#" + "{:<s}    "*81
 fmt_str = "{:.4e}    "*43
-tavg_fmt_str = "{:.4e}    "*85
+tavg_fmt_str = "{:.4e}    "*81
 # 20 columns
 header_string = header_string.format('Re','B','Pr', 'Pe', 'BPe', 't', 'uh_rms',\
     'vortz_rms', 'wrms',\
