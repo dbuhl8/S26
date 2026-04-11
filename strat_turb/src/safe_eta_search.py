@@ -69,7 +69,7 @@ else:  # steady forcing sims
                       'horizontal-shear/Re1000_Pe100_B3/',\
                       'horizontal-shear/Re1000_Pe100_B30/',\
                       'horizontal-shear/Re1000_Pe100_B300/']
-        Re1000_Pe100_bounds=[[35,65],[91,92],[85,86],[63,64],[91,92]]
+        Re1000_Pe100_bounds=[[30,70],[90,110],[65,90],[50,90],[109,120]]
 
         Re300_Pe30=['horizontal-shear/Re300_Pe30_B0.01/',\
                     'horizontal-shear/Re300_Pe30_B0.1/',\

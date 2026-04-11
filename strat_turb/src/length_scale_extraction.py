@@ -6,12 +6,12 @@ from netCDF4 import MFDataset
 from netCDF4 import Dataset
 
 
-testing = False
+testing = True
 
 if testing:
     # only run this code on a single simulation set to ensure accuracy of code
-    Re600_Pe60=['nonrotating/B300Re600Pe60/']
-    Re600_Pe60_bounds=[[40,80]]
+    Re600_Pe60=['nonrotating/B100Re600Pe60/']
+    Re600_Pe60_bounds=[[45,160]]
 
     simulations = [Re600_Pe60]
     bounds = [Re600_Pe60_bounds]
@@ -30,22 +30,11 @@ else:
     bounds = [Re600_Pe60_bounds, Re1000_Pe100_bounds]
 
 # preparing output file
-header_string = "#" + "{:<s}    "*53
 tavg_header_string = "#" + "{:<s}    "*101
-fmt_str = "{:.4e}    "*53
 tavg_fmt_str = "{:.4e}    "*101
-# 20 columns
-header_string = header_string.format('Re','B','Pr', 'Pe', 'BPe', 't',\
-    'uh_rms','w_rms','temp_rms','vortz_rms',\
-    'tdisp', 'mdisp', 'eta', 'TKE_disp', 'turb_dens_flux', 'turb_flux_coef',\
-    'turb_Fr', 'grad_Ri', 'buoyancy_Re',\
-    'LH', 'LZ', 'LT', 'LO', 'LE', 'LK',\
-    'vlam', 'vturb')
 
-io_file = open('length_scale_extraction.dat','w')
-io_file.write(header_string)
+tavg_file = open('length_scale_extraction_tavg.dat','w')
 tavg_file.write(tavg_header_string)
-io_file.write('\n')
 tavg_file.write('\n')
 
 index_counter = 0
@@ -187,7 +176,7 @@ for m, sim_set in enumerate(simulations):
                 uh_rms = np.append(uh_rms,db.rms(uh[i,:,:,:]))
                 vortz_rms = np.append(vortz_rms,db.rms(vortz[i,:,:,:]))
                 # computing wrms (and weighted version)
-                w_rms = np.append(avg_wrms,db.rms(uz[i,:,:,:]))
+                w_rms = np.append(w_rms,db.rms(uz[i,:,:,:]))
 
                                 # identifying turbulent and laminar regions
                 # with rescaling to the effective Froude and vortz
@@ -268,39 +257,10 @@ for m, sim_set in enumerate(simulations):
         vturb = vturb[indices]
 
         Nt = len(t)
-        io_file.write('# Index {:03d}: Re = {:6.2f}, Pe = {:6.2f}, B = {:6.2f}'\
-            .format(index_counter,Re,Pe,B))
         tavg_file.write('# Index {:03d}: Re = {:6.2f}, Pe = {:6.2f}'\
             .format(index_counter,Re,Pe))
-        io_file.write('\n')
         tavg_file.write('\n')
         index_counter += 1
-        # write to output file
-        for i in range(Nt):
-            io_file.write(fmt_str.format(Re,B,Pe/Re,Pe,B*Pe,\
-            t[i],uh_rms[i],vortz_rms[i],avg_wrms[i],\
-            avg_tdisp[i],avg_mdisp[i],avg_local_eta[i],avg_global_eta[i],\
-            avg_lam_wrms[i],avg_lam_tdisp[i],avg_lam_mdisp[i],\
-            avg_local_lam_eta[i],avg_global_lam_eta[i],\
-            avg_turb_wrms[i],avg_turb_tdisp[i],avg_turb_mdisp[i],\
-            avg_local_turb_eta[i],avg_global_turb_eta[i],\
-            avg_lam_Fr_wrms[i],avg_lam_Fr_tdisp[i],avg_lam_Fr_mdisp[i],\
-            avg_local_lam_Fr_eta[i],avg_global_lam_Fr_eta[i],\
-            avg_turb_Fr_wrms[i],avg_turb_Fr_tdisp[i],avg_turb_Fr_mdisp[i],\
-            avg_local_turb_Fr_eta[i],avg_global_turb_Fr_eta[i],\
-            avg_lam_Fr_vortz_wrms[i],\
-            avg_lam_Fr_vortz_tdisp[i],avg_lam_Fr_vortz_mdisp[i],\
-            avg_local_lam_Fr_vortz_eta[i],avg_global_lam_Fr_vortz_eta[i],\
-            avg_turb_Fr_vortz_wrms[i],\
-            avg_turb_Fr_vortz_tdisp[i],avg_turb_Fr_vortz_mdisp[i],\
-            avg_local_turb_Fr_vortz_eta[i],avg_global_turb_Fr_vortz_eta[i],\
-            vlam[i],vturb[i],\
-            vlam_Fr[i],vturb_Fr[i],\
-            vlam_Fr_vortz[i],vturb_Fr_vortz[i],\
-            avg_lam_wrms_wght[i], avg_turb_wrms_wght[i],\
-            avg_lam_wrms_eff_wght[i], avg_turb_wrms_eff_wght[i],\
-            ))
-            io_file.write('\n')
 
         # do temporal averages and write to file
         lb, ub = bounds[m][n]
@@ -484,8 +444,6 @@ for m, sim_set in enumerate(simulations):
             avg_lam_wrms_eff_wght,err_lam_wrms_eff_wght,\
             avg_turb_wrms_eff_wght,err_turb_wrms_eff_wght))
         tavg_file.write('\n')
-        io_file.write('\n\n\n')
-    io_file.write('\n\n\n')
     tavg_file.write('\n\n\n')
     
 

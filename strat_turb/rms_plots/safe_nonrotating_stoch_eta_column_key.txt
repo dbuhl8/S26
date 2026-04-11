@@ -1,0 +1,131 @@
+Column key for: safe_nonrotating_stoch_eta.dat
+(timeseries output — one row per timestep per simulation)
+
+  Col   1: Re
+  Col   2: B
+  Col   3: Pr
+  Col   4: Pe
+  Col   5: BPe
+  Col   6: t
+  Col   7: uh_rms
+  Col   8: vortz_rms
+  Col   9: wrms
+  Col  10: tdisp
+  Col  11: mdisp
+  Col  12: eta (local)
+  Col  13: eta (global)
+  Col  14: lam wrms
+  Col  15: lam tdisp
+  Col  16: lam mdisp
+  Col  17: lam eta (local)
+  Col  18: lam eta (global)
+  Col  19: turb wrms
+  Col  20: turb tdisp
+  Col  21: turb mdisp
+  Col  22: turb eta (local)
+  Col  23: turb eta (global)
+  Col  24: vlam
+  Col  25: vturb
+  Col  26: lam wrms wght
+  Col  27: turb wrms wght
+  Col  28: lam wrms eff wght
+  Col  29: turb wrms eff wght
+  Col  30: trms
+  Col  31: lam trms
+  Col  32: turb trms
+  Col  33: lam trms wght
+  Col  34: turb trms wght
+  Col  35: lam trms eff wght
+  Col  36: turb trms eff wght
+  Col  37: bflux
+  Col  38: lam bflux
+  Col  39: turb bflux
+  Col  40: lam bflux wght
+  Col  41: turb bflux wght
+  Col  42: lam bflux eff wght
+  Col  43: turb bflux eff wght
+
+Column key for: stoch_tavg_eta.dat
+(time-averaged output — one row per simulation)
+
+  Col   1: Re
+  Col   2: B
+  Col   3: Pr
+  Col   4: Pe
+  Col   5: BPe
+  Col   6: lb
+  Col   7: ub
+  Col   8: uh_rms
+  Col   9: uh_err
+  Col  10: vortz_rms
+  Col  11: vortz err
+  Col  12: wrms
+  Col  13: wrms err
+  Col  14: tdisp
+  Col  15: tdisp_err
+  Col  16: mdisp
+  Col  17: mdisp_err
+  Col  18: eta (local)
+  Col  19: eta (local) err
+  Col  20: eta (global)
+  Col  21: eta (global) err
+  Col  22: lam wrms
+  Col  23: lam wrms err
+  Col  24: lam tdisp
+  Col  25: lam tdisp err
+  Col  26: lam mdisp
+  Col  27: lam mdisp err
+  Col  28: lam eta (local)
+  Col  29: lam eta (local) err
+  Col  30: lam eta (global)
+  Col  31: lam eta (global) err
+  Col  32: turb wrms
+  Col  33: turb wrms err
+  Col  34: turb tdisp
+  Col  35: turb tdisp err
+  Col  36: turb mdisp
+  Col  37: turb mdisp err
+  Col  38: turb eta (local)
+  Col  39: turb eta (local) err
+  Col  40: turb eta (global)
+  Col  41: turb eta (global) err
+  Col  42: vlam avg
+  Col  43: vlam err
+  Col  44: vturb avg
+  Col  45: vturb err
+  Col  46: lam wrms wght
+  Col  47: lam wrms wght err
+  Col  48: turb wrms wght
+  Col  49: turb wrms wght err
+  Col  50: lam wrms eff wght
+  Col  51: lam wrms eff wght err
+  Col  52: turb wrms eff wght
+  Col  53: turb wrms eff wght err
+  Col  54: trms
+  Col  55: trms err
+  Col  56: lam trms
+  Col  57: lam trms err
+  Col  58: turb trms
+  Col  59: turb trms err
+  Col  60: lam trms wght
+  Col  61: lam trms wght err
+  Col  62: turb trms wght
+  Col  63: turb trms wght err
+  Col  64: lam trms eff wght
+  Col  65: lam trms eff wght err
+  Col  66: turb trms eff wght
+  Col  67: turb trms eff wght err
+  Col  68: bflux
+  Col  69: bflux err
+  Col  70: lam bflux
+  Col  71: lam bflux err
+  Col  72: turb bflux
+  Col  73: turb bflux err
+  Col  74: lam bflux wght
+  Col  75: lam bflux wght err
+  Col  76: turb bflux wght
+  Col  77: turb bflux wght err
+  Col  78: lam bflux eff wght
+  Col  79: lam bflux eff wght err
+  Col  80: turb bflux eff wght
+  Col  81: turb bflux eff wght err
