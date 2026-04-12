@@ -728,3 +728,561 @@ variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
 Final set of parameters            Asymptotic Standard Error
 =======================            ==========================
 a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:15:11 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 6.6267972275e-02   0.00e+00  1.00e+00    1.000000e+00
+   4 1.1773662591e-03  -3.80e-08  1.00e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.80135e-13
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:15:11 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:17:20 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:17:20 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:17:33 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:17:33 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:17:59 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:17:59 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:19:08 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:19:08 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:19:49 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:19:49 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:20:17 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:20:17 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:25:11 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:25:11 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
+
+
+*******************************************************************************
+Sat Apr 11 23:33:12 2026
+
+
+FIT:    data read from "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 2
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 7.2231748530e-03   0.00e+00  1.13e+00    1.125422e+00
+   4 1.1773662591e-03  -3.54e-09  1.13e-04    1.180403e+00
+
+After 4 iterations the fit converged.
+final sum of squares of residuals : 0.00117737
+rel. change during last iteration : -3.53614e-14
+
+degrees of freedom    (FIT_NDF)                        : 1
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.0343128
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00117737
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.1804           +/- 0.02426      (2.055%)
+
+
+*******************************************************************************
+Sat Apr 11 23:33:12 2026
+
+
+FIT:    data read from "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54))
+        format = x:z
+        x range restricted to [20.0000 : 1.00000e+06]
+        #datapoints = 6
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a            
+   0 2.3385589938e-02   0.00e+00  1.18e+00    1.180403e+00
+   3 5.2481640122e-03  -1.95e-02  1.18e-03    1.125422e+00
+
+After 3 iterations the fit converged.
+final sum of squares of residuals : 0.00524816
+rel. change during last iteration : -1.95264e-07
+
+degrees of freedom    (FIT_NDF)                        : 5
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.032398
+variance of residuals (reduced chisquare) = WSSR/ndf   : 0.00104963
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 1.12542          +/- 0.01323      (1.175%)
