@@ -225,8 +225,8 @@ def iFD6Y(field,ny,dy):
                            -45*field[:,ny-1,:]\
                            +45*field[:,ny-3,:]-9*field[:,ny-4,:]\
                            +field[:,ny-5,:])
-    dy_field[:,ny-2,:] = (1/(60*dy))*(-field[:,0,:]+9*field[:,ny-1,:]\
-                           -45*field[:,ny-3,:]\
+    dy_field[:,ny-3,:] = (1/(60*dy))*(-field[:,0,:]+9*field[:,ny-1,:]\
+                           -45*field[:,ny-2,:]\
                            +45*field[:,ny-4,:]-9*field[:,ny-5,:]\
                            +field[:,ny-6,:])
     dy_field[:,2,:] = (1/(60*dy))*(-field[:,5,:]+9*field[:,4,:]\
@@ -320,8 +320,8 @@ def FD6Y_xyslice(field,ny,dy):
                            -45*field[:,ny-1,:]\
                            +45*field[:,ny-3,:]-9*field[:,ny-4,:]\
                            +field[:,ny-5,:])
-    dy_field[:,ny-2,:] = (1/(60*dy))*(-field[:,0,:]+9*field[:,ny-1,:]\
-                           -45*field[:,ny-3,:]\
+    dy_field[:,ny-3,:] = (1/(60*dy))*(-field[:,0,:]+9*field[:,ny-1,:]\
+                           -45*field[:,ny-2,:]\
                            +45*field[:,ny-4,:]-9*field[:,ny-5,:]\
                            +field[:,ny-6,:])
     dy_field[:,2,:] = (1/(60*dy))*(-field[:,5,:]+9*field[:,4,:]\
