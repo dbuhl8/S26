@@ -1,7 +1,7 @@
 reset
 set terminal png
 #set multiplot layout 2,1 columnsfirst 
-set output "wrms_uhrms.png"
+set output "wrms_uhrms_2.png"
 
 set tics font "Roman,15"
 set title font "Roman,25"
@@ -251,10 +251,12 @@ plot "steady_tavg_eta.dat" \
    i 0 u (($2**0.5)/$8):($12/$8) w yerrorbars pt 4 ps 2 lc rgb "black" title 'Steady (Re,Pr) = (600,0.1)',\
 "stoch_tavg_eta.dat" \
    i 0 u (($2**0.5)/$8):($12/$8) w yerrorbars pt 7 ps 2 lc rgb "black" title 'Stoch (Re,Pr) = (600,0.1)',\
-"../steady_tavg_eta.dat" \
+"new_steady_tavg_eta.dat" \
    i 0 u (($2**0.5)/$8):($12/$8) w yerrorbars pt 4 ps 2 lc rgb "red" title 'Steady (Re,Pr) = (600,0.1)',\
-"../stoch_tavg_eta.dat" \
+"new_stoch_tavg_eta.dat" \
    i 0 u (($2**0.5)/$8):($12/$8) w yerrorbars pt 7 ps 2 lc rgb "red" title 'Stoch (Re,Pr) = (600,0.1)',\
+0.5*x**-1 w l dt 2 lc rgb "black",\
+0.33*x**-0.5 w l dt 2 lc rgb "red"
 
 
 #"" i 1 u (($2**0.5)/$8):($12/$8) w yerrorbars pt 4 ps 2 lc rgb "blue" title 'Steady (Re,Pr) = (600,0.05)',\

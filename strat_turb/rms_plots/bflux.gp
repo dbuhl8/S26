@@ -224,14 +224,14 @@ set log xy
 #       = (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5)
 
 plot "steady_tavg_eta.dat" \
-   i 0 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70:71 w yerrorbars pt 4 ps 2 lc rgb "black" title 'Steady (Re,Pr) = (600,0.1)',\
-"" i 1 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "blue" title 'Steady (Re,Pr) = (600,0.05)',\
-"" i 2 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "red" title 'Steady (Re,Pr) = (1000,0.1)',\
-"" i 3 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "dark-violet" title 'Steady (Re,Pr) = (300,0.1)',\
-"" i 4 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "forest-green" title 'Steady (Re,Pr) = (1000,0.01)',\
+   i 0 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70:71 w yerrorbars pt 4 ps 2 lc rgb "black" title 'Steady (Re,Pr) = (600,0.1)',\
+"" i 1 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "blue" title 'Steady (Re,Pr) = (600,0.05)',\
+"" i 2 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "red" title 'Steady (Re,Pr) = (1000,0.1)',\
+"" i 3 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "dark-violet" title 'Steady (Re,Pr) = (300,0.1)',\
+"" i 4 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70 w yerrorbars pt 4 ps 2 lc rgb "forest-green" title 'Steady (Re,Pr) = (1000,0.01)',\
 "stoch_tavg_eta.dat" \
-   i 0 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70 w yerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch. (Re,Pr) = (600,0.1)',\
-"" i 1 u (($42*(1.2*(($2**-0.5)*$8)**3)**2 + $44*(1.2*(($2**-0.5)*$8)**2)**2)**0.5):70 w yerrorbars pt 9 ps 2 lc rgb "red" title 'Stoch. (Re,Pr) = (1000,0.1)',\
+   i 0 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70 w yerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch. (Re,Pr) = (600,0.1)',\
+"" i 1 u (($42*(1.17*(($2**-0.5)*$8)**3)**2 + $44*(1.15*(($2**-0.5)*$8)**1.5)**2)**0.5):70 w yerrorbars pt 9 ps 2 lc rgb "red" title 'Stoch. (Re,Pr) = (1000,0.1)',\
 x w l lw 2 dt 2 lc rgb "black"
 #"" i 2 u 2:($68/($12*$54)) w yerrorbars pt 9 ps 2 lc rgb "forest-green" title 'Steady MDisp',\
 
@@ -240,9 +240,25 @@ fit [20:1e6] f(x) "stoch_tavg_eta.dat" u ($16/$2):($68/($12*$54)) via a
 stoch_c = a
 fit [20:1e6] f(x) "steady_tavg_eta.dat" u ($16/$2):($68/($12*$54)) via a
 steady_c = a
+fit [20:1e6] f(x) "stoch_tavg_eta.dat" u ($16/$2):($70/($22*$56)) via a
+stoch_c_lam = a
+fit [20:1e6] f(x) "steady_tavg_eta.dat" u ($16/$2):($70/($22*$56)) via a
+steady_c_lam = a
+fit [20:1e6] f(x) "stoch_tavg_eta.dat" u ($16/$2):($72/($32*$58)) via a
+stoch_c_turb = a
+fit [20:1e6] f(x) "steady_tavg_eta.dat" u ($16/$2):($72/($32*$58)) via a
+steady_c_turb = a
+
+
 
 print "Stochastic Coefficient: ", stoch_c
 print "Steady Coefficient: ", steady_c
+print "Stochastic Lam Coefficient: ", stoch_c_lam
+print "Steady Lam Coefficient: ", steady_c_lam
+print "Stochastic Turb Coefficient: ", stoch_c_turb
+print "Steady Turb Coefficient: ", steady_c_turb
+
+
 
 
 } # end of block 5 }}}
