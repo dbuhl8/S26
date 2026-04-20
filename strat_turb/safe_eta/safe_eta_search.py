@@ -5,8 +5,7 @@ import fnmatch
 from netCDF4 import MFDataset
 from netCDF4 import Dataset
 
-Re600_Pe60=['horizontal-shear/Re600_Pe60_B100/',\
-            'horizontal-shear/Re600_Pe60_B0.1/',\
+Re600_Pe60=['horizontal-shear/Re600_Pe60_B0.1/',\
             'horizontal-shear/Re600_Pe60_B1/',\
             'horizontal-shear/Re600_Pe60_B10/',\
             'horizontal-shear/Re600_Pe60_B100/',\
@@ -16,7 +15,7 @@ Re600_Pe60=['horizontal-shear/Re600_Pe60_B100/',\
             'horizontal-shear/Re600_Pe60_B400/',\
             'horizontal-shear/Re600_Pe60_B6000/']
 
-Re600_Pe60_bounds=[[150,300],[275,400],[180,320],\
+Re600_Pe60_bounds=[[275,400],[180,320],\
     [220,450],[150,300],[500,900],[375,560],[650,900],\
     [225,460],[40,180]]
 

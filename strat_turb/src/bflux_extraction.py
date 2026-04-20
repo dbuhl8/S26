@@ -19,25 +19,27 @@ if testing:
     stoch_bounds = [stoch_Re600_Pe60_bounds]
     stoch_params = [stoch_Re600_Pe60_params]
 else:
-    stoch_Re600_Pe60 = ['nonrotating/B300Re600Pe60/', 'nonrotating/B180Re600Pe60/',
-                        'nonrotating/B100Re600Pe60/', 'nonrotating/B30Re600Pe60/',
-                        'nonrotating/B10Re600Pe60/', 'nonrotating/B3Re600Pe60/',
-                        'nonrotating/B1Re600Pe60/']
-    stoch_Re1000_Pe100 = ['nonrotating/B100Re1000Pe100/',
-                          'nonrotating/B10Re1000Pe100/']
+    stoch_Re600_Pe60 = ['nonrotating/B1Re600Pe60/',   'nonrotating/B3Re600Pe60/',
+                        'nonrotating/B30Re600Pe60/',  'nonrotating/B100Re600Pe60/',
+                        'nonrotating/B180Re600Pe60/', 'nonrotating/B300Re600Pe60/']
+    stoch_Re1000_Pe100 = ['nonrotating/B10Re1000Pe100/',
+                          'nonrotating/B100Re1000Pe100/']
 
-    stoch_Re600_Pe60_bounds = [[40, 80], [40, 90], [45, 160],
-                               [35, 80], [50, 250], [55, 110], [45, 125]]
-    stoch_Re1000_Pe100_bounds = [[40, 70], [70, 110]]
+    stoch_Re600_Pe60_bounds = [[45, 125], [55, 110], [35, 80],
+                               [45, 160], [40, 90],  [40, 80]]
+    stoch_Re1000_Pe100_bounds = [[70, 110], [40, 70]]
 
-    stoch_Re600_Pe60_params  = [(600, 60, 300), (600, 60, 180), (600, 60, 100),
-                                (600, 60, 30),  (600, 60, 10),  (600, 60, 3),
-                                (600, 60, 1)]
-    stoch_Re1000_Pe100_params = [(1000, 100, 100), (1000, 100, 10)]
+    stoch_Re600_Pe60_params  = [(600, 60, 1),   (600, 60, 3),   (600, 60, 30),
+                                (600, 60, 100), (600, 60, 180), (600, 60, 300)]
+    stoch_Re1000_Pe100_params = [(1000, 100, 10), (1000, 100, 100)]
 
-    stoch_simulations = [stoch_Re600_Pe60, stoch_Re1000_Pe100]
-    stoch_bounds = [stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds]
-    stoch_params = [stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params]
+    stoch_Re300_Pe30 = ['nonrotating/B10Re300Pe30/']
+    stoch_Re300_Pe30_bounds = [[50, 250]]
+    stoch_Re300_Pe30_params = [(300, 30, 10)]
+
+    stoch_simulations = [stoch_Re600_Pe60, stoch_Re1000_Pe100, stoch_Re300_Pe30]
+    stoch_bounds = [stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds, stoch_Re300_Pe30_bounds]
+    stoch_params = [stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params, stoch_Re300_Pe30_params]
 
 # ---------------------------------------------------------------------------
 # Steady forcing simulations
@@ -52,50 +54,51 @@ if testing:
     steady_params = [steady_Re600_Pe60_params]
 else:
     steady_Re600_Pe60 = ['horizontal-shear/Re600_Pe60_B0.1/',
+                         'horizontal-shear/Re600_Pe60_B1/',
+                         'horizontal-shear/Re600_Pe60_B10/',
+                         'horizontal-shear/Re600_Pe60_B30/',
+                         'horizontal-shear/Re600_Pe60_B100/',
+                         'horizontal-shear/Re600_Pe60_B400/',
                          'horizontal-shear/Re600_Pe60_B1000/',
                          'horizontal-shear/Re600_Pe60_B3000/',
-                         'horizontal-shear/Re600_Pe60_B400/',
                          'horizontal-shear/Re600_Pe60_B6000/']
-                         #'horizontal-shear/Re600_Pe60_B100/',\
-                         #'horizontal-shear/Re600_Pe60_B1/',\
-                         #'horizontal-shear/Re600_Pe60_B10/',\
-                         #'horizontal-shear/Re600_Pe60_B30/',\
-    steady_Re600_Pe60_bounds = [[150, 300], [275, 400], [180, 320],
-                                [220, 450], [500, 900], [375, 560], [650, 900],
-                                [225, 460], [40, 180]]
-    steady_Re600_Pe60_params = [(600, 60, 0.1), (600, 60, 1000), (600, 60, 3000),
-                                (600, 60, 400), (600, 60, 6000)]
+    steady_Re600_Pe60_bounds = [[275, 400], [180, 320], [220, 450],
+                                [375, 560], [150, 300], [225, 460],
+                                [500, 900], [650, 900], [40, 180]]
+    steady_Re600_Pe60_params = [(600, 60, 0.1),  (600, 60, 1),    (600, 60, 10),
+                                (600, 60, 30),   (600, 60, 100),  (600, 60, 400),
+                                (600, 60, 1000), (600, 60, 3000), (600, 60, 6000)]
 
     steady_Re600_Pe30 = ['horizontal-shear/Re600_Pe30_B10/',
-                         'horizontal-shear/Re600_Pe30_B100/',
-                         'horizontal-shear/Re600_Pe30_B30/']
-    steady_Re600_Pe30_bounds = [[260, 300], [300, 400], [400, 480]]
-    steady_Re600_Pe30_params = [(600, 30, 10), (600, 30, 100), (600, 30, 30)]
+                         'horizontal-shear/Re600_Pe30_B30/',
+                         'horizontal-shear/Re600_Pe30_B100/']
+    steady_Re600_Pe30_bounds = [[260, 300], [400, 480], [300, 400]]
+    steady_Re600_Pe30_params = [(600, 30, 10), (600, 30, 30), (600, 30, 100)]
 
-    steady_Re1000_Pe100 = ['horizontal-shear/Re1000_Pe100_B10/',
-                           'horizontal-shear/Re1000_Pe100_B100/',
-                           'horizontal-shear/Re1000_Pe100_B3/',
+    steady_Re1000_Pe100 = ['horizontal-shear/Re1000_Pe100_B3/',
+                           'horizontal-shear/Re1000_Pe100_B10/',
                            'horizontal-shear/Re1000_Pe100_B30/',
+                           'horizontal-shear/Re1000_Pe100_B100/',
                            'horizontal-shear/Re1000_Pe100_B300/']
-    steady_Re1000_Pe100_bounds = [[30, 70], [90, 110], [65, 90], [50, 90], [109, 120]]
-    steady_Re1000_Pe100_params = [(1000, 100, 10), (1000, 100, 100), (1000, 100, 3),
-                                  (1000, 100, 30), (1000, 100, 300)]
+    steady_Re1000_Pe100_bounds = [[65, 90], [30, 70], [50, 90], [90, 110], [109, 120]]
+    steady_Re1000_Pe100_params = [(1000, 100, 3),  (1000, 100, 10), (1000, 100, 30),
+                                  (1000, 100, 100), (1000, 100, 300)]
 
     steady_Re300_Pe30 = ['horizontal-shear/Re300_Pe30_B0.01/',
                          'horizontal-shear/Re300_Pe30_B0.1/',
                          'horizontal-shear/Re300_Pe30_B1/',
                          'horizontal-shear/Re300_Pe30_B10/',
-                         'horizontal-shear/Re300_Pe30_B100/',
-                         'horizontal-shear/Re300_Pe30_B1000/',
-                         'horizontal-shear/Re300_Pe30_B10000/',
                          'horizontal-shear/Re300_Pe30_B30/',
-                         'horizontal-shear/Re300_Pe30_B300/']
+                         'horizontal-shear/Re300_Pe30_B100/',
+                         'horizontal-shear/Re300_Pe30_B300/',
+                         'horizontal-shear/Re300_Pe30_B1000/',
+                         'horizontal-shear/Re300_Pe30_B10000/']
     steady_Re300_Pe30_bounds = [[370, 460], [260, 460], [140, 280], [60, 160],
-                                [300, 1200], [800, 1300], [1050, 1450], [50, 300],
-                                [300, 900]]
-    steady_Re300_Pe30_params = [(300, 30, 0.01), (300, 30, 0.1), (300, 30, 1),
-                                (300, 30, 10),   (300, 30, 100), (300, 30, 1000),
-                                (300, 30, 10000),(300, 30, 30),  (300, 30, 300)]
+                                [50, 300],  [300, 1200], [300, 900],
+                                [800, 1300], [1050, 1450]]
+    steady_Re300_Pe30_params = [(300, 30, 0.01), (300, 30, 0.1),   (300, 30, 1),
+                                (300, 30, 10),   (300, 30, 30),    (300, 30, 100),
+                                (300, 30, 300),  (300, 30, 1000),  (300, 30, 10000)]
 
     steady_Re1000_Pe10 = ['horizontal-shear/Re1000_Pe10_B3/',
                           'horizontal-shear/Re1000_Pe10_B100/',
@@ -123,17 +126,18 @@ else:
 #   Index group 4: Re 1000 Pe 100 steady
 #   Index group 5: Re 600  Pe 60  stoch
 #   Index group 6: Re 1000 Pe 100 stoch
+#   Index group 7: Re 300  Pe 30  stoch
 # (each group spans multiple indices, one per B value)
 # ---------------------------------------------------------------------------
 simulations = [steady_Re300_Pe30, steady_Re600_Pe30, steady_Re600_Pe60,
                steady_Re1000_Pe10, steady_Re1000_Pe100,
-               stoch_Re600_Pe60, stoch_Re1000_Pe100]
+               stoch_Re600_Pe60, stoch_Re1000_Pe100, stoch_Re300_Pe30]
 bounds = [steady_Re300_Pe30_bounds, steady_Re600_Pe30_bounds, steady_Re600_Pe60_bounds,
           steady_Re1000_Pe10_bounds, steady_Re1000_Pe100_bounds,
-          stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds]
+          stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds, stoch_Re300_Pe30_bounds]
 params = [steady_Re300_Pe30_params, steady_Re600_Pe30_params, steady_Re600_Pe60_params,
           steady_Re1000_Pe10_params, steady_Re1000_Pe100_params,
-          stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params]
+          stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params, stoch_Re300_Pe30_params]
 
 # flat dict: dir_path -> (Re, Pe, B)
 sim_params = {path: p
@@ -415,6 +419,10 @@ for m, sim_set in enumerate(simulations):
 
         avg_uzrms_lam, err_uzrms_lam = db.discounted_tavg(avg_uzrms_lam, vlam, tidx)
         avg_uzrms_turb, err_uzrms_turb = db.discounted_tavg(avg_uzrms_turb, vturb, tidx)
+        avg_uzrms_lam  /= uh_rms_out
+        err_uzrms_lam  /= uh_rms_out
+        avg_uzrms_turb /= uh_rms_out
+        err_uzrms_turb /= uh_rms_out
 
         vturb_avg, vturb_err = db.tavg(vturb, tidx)
 
