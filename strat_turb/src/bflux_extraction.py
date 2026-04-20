@@ -13,9 +13,11 @@ testing = False
 if testing:
     stoch_Re600_Pe60 = ['nonrotating/B300Re600Pe60/']
     stoch_Re600_Pe60_bounds = [[40, 80]]
+    stoch_Re600_Pe60_params = [(600, 60, 300)]
 
     stoch_simulations = [stoch_Re600_Pe60]
     stoch_bounds = [stoch_Re600_Pe60_bounds]
+    stoch_params = [stoch_Re600_Pe60_params]
 else:
     stoch_Re600_Pe60 = ['nonrotating/B300Re600Pe60/', 'nonrotating/B180Re600Pe60/',
                         'nonrotating/B100Re600Pe60/', 'nonrotating/B30Re600Pe60/',
@@ -28,8 +30,14 @@ else:
                                [35, 80], [50, 250], [55, 110], [45, 125]]
     stoch_Re1000_Pe100_bounds = [[40, 70], [70, 110]]
 
+    stoch_Re600_Pe60_params  = [(600, 60, 300), (600, 60, 180), (600, 60, 100),
+                                (600, 60, 30),  (600, 60, 10),  (600, 60, 3),
+                                (600, 60, 1)]
+    stoch_Re1000_Pe100_params = [(1000, 100, 100), (1000, 100, 10)]
+
     stoch_simulations = [stoch_Re600_Pe60, stoch_Re1000_Pe100]
     stoch_bounds = [stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds]
+    stoch_params = [stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params]
 
 # ---------------------------------------------------------------------------
 # Steady forcing simulations
@@ -37,9 +45,11 @@ else:
 if testing:
     steady_Re600_Pe60 = ['horizontal-shear/Re600_Pe60_B100/']
     steady_Re600_Pe60_bounds = [[150, 300]]
+    steady_Re600_Pe60_params = [(600, 60, 100)]
 
     steady_simulations = [steady_Re600_Pe60]
     steady_bounds = [steady_Re600_Pe60_bounds]
+    steady_params = [steady_Re600_Pe60_params]
 else:
     steady_Re600_Pe60 = ['horizontal-shear/Re600_Pe60_B0.1/',
                          'horizontal-shear/Re600_Pe60_B1000/',
@@ -53,11 +63,14 @@ else:
     steady_Re600_Pe60_bounds = [[150, 300], [275, 400], [180, 320],
                                 [220, 450], [500, 900], [375, 560], [650, 900],
                                 [225, 460], [40, 180]]
+    steady_Re600_Pe60_params = [(600, 60, 0.1), (600, 60, 1000), (600, 60, 3000),
+                                (600, 60, 400), (600, 60, 6000)]
 
     steady_Re600_Pe30 = ['horizontal-shear/Re600_Pe30_B10/',
                          'horizontal-shear/Re600_Pe30_B100/',
                          'horizontal-shear/Re600_Pe30_B30/']
     steady_Re600_Pe30_bounds = [[260, 300], [300, 400], [400, 480]]
+    steady_Re600_Pe30_params = [(600, 30, 10), (600, 30, 100), (600, 30, 30)]
 
     steady_Re1000_Pe100 = ['horizontal-shear/Re1000_Pe100_B10/',
                            'horizontal-shear/Re1000_Pe100_B100/',
@@ -65,6 +78,8 @@ else:
                            'horizontal-shear/Re1000_Pe100_B30/',
                            'horizontal-shear/Re1000_Pe100_B300/']
     steady_Re1000_Pe100_bounds = [[30, 70], [90, 110], [65, 90], [50, 90], [109, 120]]
+    steady_Re1000_Pe100_params = [(1000, 100, 10), (1000, 100, 100), (1000, 100, 3),
+                                  (1000, 100, 30), (1000, 100, 300)]
 
     steady_Re300_Pe30 = ['horizontal-shear/Re300_Pe30_B0.01/',
                          'horizontal-shear/Re300_Pe30_B0.1/',
@@ -78,12 +93,16 @@ else:
     steady_Re300_Pe30_bounds = [[370, 460], [260, 460], [140, 280], [60, 160],
                                 [300, 1200], [800, 1300], [1050, 1450], [50, 300],
                                 [300, 900]]
+    steady_Re300_Pe30_params = [(300, 30, 0.01), (300, 30, 0.1), (300, 30, 1),
+                                (300, 30, 10),   (300, 30, 100), (300, 30, 1000),
+                                (300, 30, 10000),(300, 30, 30),  (300, 30, 300)]
 
     steady_Re1000_Pe10 = ['horizontal-shear/Re1000_Pe10_B3/',
                           'horizontal-shear/Re1000_Pe10_B100/',
                           'horizontal-shear/Re1000_Pe10_B1000/']
                           #'horizontal-shear/Re1000_Pe10_B10/',\
     steady_Re1000_Pe10_bounds = [[35, 40], [35, 70], [94, 95], [62, 63]]
+    steady_Re1000_Pe10_params = [(1000, 10, 3), (1000, 10, 100), (1000, 10, 1000)]
 
     steady_simulations = [steady_Re600_Pe60, steady_Re600_Pe30,
                           steady_Re1000_Pe100, steady_Re300_Pe30,
@@ -91,6 +110,9 @@ else:
     steady_bounds = [steady_Re600_Pe60_bounds, steady_Re600_Pe30_bounds,
                      steady_Re1000_Pe100_bounds, steady_Re300_Pe30_bounds,
                      steady_Re1000_Pe10_bounds]
+    steady_params = [steady_Re600_Pe60_params, steady_Re600_Pe30_params,
+                     steady_Re1000_Pe100_params, steady_Re300_Pe30_params,
+                     steady_Re1000_Pe10_params]
 
 # ---------------------------------------------------------------------------
 # Combine into a single list in the desired index order:
@@ -109,6 +131,14 @@ simulations = [steady_Re300_Pe30, steady_Re600_Pe30, steady_Re600_Pe60,
 bounds = [steady_Re300_Pe30_bounds, steady_Re600_Pe30_bounds, steady_Re600_Pe60_bounds,
           steady_Re1000_Pe10_bounds, steady_Re1000_Pe100_bounds,
           stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds]
+params = [steady_Re300_Pe30_params, steady_Re600_Pe30_params, steady_Re600_Pe60_params,
+          steady_Re1000_Pe10_params, steady_Re1000_Pe100_params,
+          stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params]
+
+# flat dict: dir_path -> (Re, Pe, B)
+sim_params = {path: p
+              for sim_set, param_set in zip(simulations, params)
+              for path, p in zip(sim_set, param_set)}
 # Column indices (0-based) for quantities extracted from OUT* files.
 # Both formats share: col 1 = t, col 5 = TEMPrms (brms).
 # Steady  OUT format: (i7, 35E20.7)
@@ -200,6 +230,8 @@ for m, sim_set in enumerate(simulations):
     tavg_file.write('# Index {:03d}\n'.format(index_counter))
     index_counter += 1
     for n, dir_path in enumerate(sim_set):
+        Re_p, Pe_p, B_p = sim_params[dir_path]
+        print("Starting sim: Re {}, Pe {}, B {}".format(Re_p, Pe_p, B_p))
         # loops over each B value in that parameter suite
         directory = os.listdir(dir_path)
         simdat_files = fnmatch.filter(directory, 'simdat*.cdf')
@@ -216,11 +248,25 @@ for m, sim_set in enumerate(simulations):
         out_files = [dir_path + f for f in out_files]
 
         out_data_list = []
-        for of in out_files:
-            try:
-                out_data_list.append(np.loadtxt(of))
-            except Exception as e:
-                print('Warning: could not read {}: {}'.format(of, e))
+        if len(out_files) > 0:
+            # peek at first data line (skip comments/blanks) to count columns
+            with open(out_files[0]) as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line and not _line.startswith('#'):
+                        ncols_out = len(_line.split())
+                        break
+            cols = OUT_COLS['steady'] if ncols_out == 36 else OUT_COLS['stoch']
+            # only load the columns we actually use
+            needed_cols = sorted(set(cols.values()))
+            col_map = {orig: new for new, orig in enumerate(needed_cols)}
+            cols = {k: col_map[v] for k, v in cols.items()}
+
+            for of in out_files:
+                try:
+                    out_data_list.append(np.loadtxt(of, usecols=needed_cols))
+                except Exception as e:
+                    print('Warning: could not read {}: {}'.format(of, e))
 
         if len(out_data_list) == 0:
             print('Warning: no OUT* files found in {} — OUT quantities set to NaN'
@@ -236,8 +282,6 @@ for m, sim_set in enumerate(simulations):
             mdisp_out    = mdisp_err    = nan
         else:
             out_data = np.vstack(out_data_list)
-            ncols_out = out_data.shape[1]
-            cols = OUT_COLS['steady'] if ncols_out == 36 else OUT_COLS['stoch']
 
             # deduplicate and sort by time
             t_out = out_data[:, cols['t']]
@@ -286,7 +330,7 @@ for m, sim_set in enumerate(simulations):
             Nz = len(z)
             np_tot = Nx * Ny * Nz
             Nt = len(t)
-            print('Number of Timesteps: ', Nt)
+            #print('Number of Timesteps: ', Nt)
             del x
             del y
             del z
@@ -300,7 +344,7 @@ for m, sim_set in enumerate(simulations):
             Pe = 1. / cdf_file.variables["D_therm"][0]
             B = cdf_file.variables["B_therm"][0]
             Fr = 1. / np.sqrt(B)
-            print("Parameters: Re - ", Re, ", Pe - ", Pe, ', B - ', B)
+            #print("Parameters: Re - ", Re, ", Pe - ", Pe, ', B - ', B)
 
             ux = np.array(cdf_file.variables["ux"])
             uy = np.array(cdf_file.variables["uy"])
