@@ -174,19 +174,20 @@ tavg_filename = 'tavg_bflux.dat'
 
 # ---------------------------------------------------------------------------
 # Output format strings and headers
-# Tavg file: 29 columns (one row per simulation)
+# Tavg file: 31 columns (one row per simulation)
 # ---------------------------------------------------------------------------
-# tavg: Re B Pe lb ub
+# tavg: Re Pe B lb ub
 #       ux_rms ux_err uy_rms uy_err uz_rms uz_err
 #       vortz_rms vortz_err brms brms_err
 #       tdisp tdisp_err mdisp mdisp_err
 #       vturb vturb_err
 #       turb_uzrms turb_uzrms_err lam_uzrms lam_uzrms_err
 #       turb_brms turb_brms_err lam_brms lam_brms_err
-tavg_ncols = 29
+#       uh_rms uh_rms_err
+tavg_ncols = 31
 tavg_fmt_str = "{:.4e}    " * tavg_ncols
 tavg_header_string = ("#" + "{:<s}    " * tavg_ncols).format(
-    'Re', 'B', 'Pe', 'lb', 'ub',
+    'Re', 'Pe', 'B', 'lb', 'ub',
     'ux_rms', 'ux_err', 'uy_rms', 'uy_err',
     'uz_rms', 'uz_err',
     'vortz_rms', 'vortz_err',
@@ -197,7 +198,8 @@ tavg_header_string = ("#" + "{:<s}    " * tavg_ncols).format(
     'turb_uzrms', 'turb_uzrms_err',
     'lam_uzrms', 'lam_uzrms_err',
     'turb_brms', 'turb_brms_err',
-    'lam_brms', 'lam_brms_err')
+    'lam_brms', 'lam_brms_err',
+    'uh_rms', 'uh_rms_err')
 
 tavg_file = open(tavg_filename, 'w')
 tavg_file.write(tavg_header_string)
@@ -207,7 +209,7 @@ tavg_file.write('\n')
 key_filename = tavg_filename.replace('.dat', '_column_key.txt')
 with open(key_filename, 'w') as key_file:
     tavg_cols = [
-        'Re', 'B', 'Pe', 'lb', 'ub',
+        'Re', 'Pe', 'B', 'lb', 'ub',
         'ux_rms', 'ux_err', 'uy_rms', 'uy_err',
         'uz_rms', 'uz_err',
         'vortz_rms', 'vortz_err',
@@ -218,7 +220,8 @@ with open(key_filename, 'w') as key_file:
         'turb_uzrms', 'turb_uzrms_err',
         'lam_uzrms', 'lam_uzrms_err',
         'turb_brms', 'turb_brms_err',
-        'lam_brms', 'lam_brms_err']
+        'lam_brms', 'lam_brms_err',
+        'uh_rms', 'uh_rms_err']
 
     key_file.write('Column key for: {}\n'.format(tavg_filename))
     key_file.write('(time-averaged output — one row per simulation)\n\n')
@@ -244,9 +247,8 @@ for m, sim_set in enumerate(simulations):
 
         # ----------------------------------------------------------------
         # OUT* file pre-processing
-        # Load here so that uh_rms_out is available for the lam/turb
+        # Load here so that uhrms_out is available for the lam/turb
         # threshold in the simdat extraction below.
-        # uh_rms_out = sqrt(uxrms_tavg**2 + uyrms_tavg**2)
         # ----------------------------------------------------------------
         out_files = sorted(fnmatch.filter(directory, 'OUT*'))
         out_files = [dir_path + f for f in out_files]
@@ -276,7 +278,7 @@ for m, sim_set in enumerate(simulations):
             print('Warning: no OUT* files found in {} — OUT quantities set to NaN'
                   .format(dir_path))
             nan = float('nan')
-            uh_rms_out   = nan
+            uhrms_out    = uhrms_err    = nan
             uxrms_out    = uxrms_err    = nan
             uyrms_out    = uyrms_err    = nan
             uzrms_out    = uzrms_err    = nan
@@ -305,7 +307,8 @@ for m, sim_set in enumerate(simulations):
             brms_out,     brms_err     = _tavg_col(cols['brms'])
             tdisp_out,    tdisp_err    = _tavg_col(cols['tdisp'])
             mdisp_out,    mdisp_err    = _tavg_col(cols['mdisp'])
-            uh_rms_out = np.sqrt(uxrms_out**2 + uyrms_out**2)
+            uhrms_ts  = np.sqrt(out_data[:, cols['uxrms']]**2 + out_data[:, cols['uyrms']]**2)
+            uhrms_out,    uhrms_err    = db.tavg(uhrms_ts, tidx_out)
 
         B = 0
         Re = 0
@@ -370,10 +373,9 @@ for m, sim_set in enumerate(simulations):
             for i in range(Nt):
                 t_tot = np.append(t_tot, t[i])
 
-                # lam/turb threshold: vortz**2 <= uh_rms_out / Fr
-                # uh_rms_out = sqrt(uxrms_tavg**2 + uyrms_tavg**2) from OUT file
-                idx_lam = np.where(vortz[i, :, :, :]**2 <= uh_rms_out / Fr)
-                idx_turb = np.where(vortz[i, :, :, :]**2 > uh_rms_out / Fr)
+                # lam/turb threshold: vortz**2 <= uhrms_out / Fr
+                idx_lam = np.where(vortz[i, :, :, :]**2 <= uhrms_out / Fr)
+                idx_turb = np.where(vortz[i, :, :, :]**2 > uhrms_out / Fr)
 
                 # brms (temperature/buoyancy rms) in lam/turb regions
                 avg_lam_brms = np.append(avg_lam_brms,
@@ -419,17 +421,17 @@ for m, sim_set in enumerate(simulations):
 
         avg_uzrms_lam, err_uzrms_lam = db.discounted_tavg(avg_uzrms_lam, vlam, tidx)
         avg_uzrms_turb, err_uzrms_turb = db.discounted_tavg(avg_uzrms_turb, vturb, tidx)
-        avg_uzrms_lam  /= uh_rms_out
-        err_uzrms_lam  /= uh_rms_out
-        avg_uzrms_turb /= uh_rms_out
-        err_uzrms_turb /= uh_rms_out
+        avg_uzrms_lam  /= uhrms_out
+        err_uzrms_lam  /= uhrms_out
+        avg_uzrms_turb /= uhrms_out
+        err_uzrms_turb /= uhrms_out
 
         vturb_avg, vturb_err = db.tavg(vturb, tidx)
 
         # shared scalar quantities come from the OUT file time averages;
         # lam/turb decompositions and vturb come from the simdat extraction
         tavg_file.write(tavg_fmt_str.format(
-            Re, B, Pe, lb, ub,
+            Re, Pe, B, lb, ub,
             uxrms_out, uxrms_err, uyrms_out, uyrms_err,
             uzrms_out, uzrms_err,
             vortzrms_out, vortzrms_err,
@@ -440,7 +442,8 @@ for m, sim_set in enumerate(simulations):
             avg_uzrms_turb, err_uzrms_turb,
             avg_uzrms_lam, err_uzrms_lam,
             avg_turb_brms, err_turb_brms,
-            avg_lam_brms, err_lam_brms))
+            avg_lam_brms, err_lam_brms,
+            uhrms_out, uhrms_err))
         tavg_file.write('\n')
 
     tavg_file.write('\n\n\n')

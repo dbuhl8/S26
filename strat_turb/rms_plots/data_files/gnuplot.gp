@@ -1,0 +1,75 @@
+reset
+
+idx = 0
+
+# {{{ Plot Settings 
+png_output = 0
+eps_output = 1
+multiplot_mode = 0
+
+if (png_output){
+    set terminal png size 800,600
+    set output "plot_mdisp.png"
+} else if (eps_output) {
+    set terminal postscript enh col
+    set output "ReB_VTurb.eps"
+}
+set tics font "Roman,22"
+set title font "Roman,35"
+set key font "Roman,20"
+set xlabel font "Roman,25"
+set ylabel font "Roman,25"
+
+if (multiplot_mode) {
+set multiplot layout 3,1 columnsfirst 
+}
+
+# }}}
+# {{{file key: 
+# steady_tavg_eta.dat: 
+# idx 0: Re600_Pe60
+# idx 1: Re600_Pe30
+# idx 2: Re1000_Pe100
+# idx 3: Re300_Pe30
+# idx 4: Re1000_Pe10
+
+# stoch_tavg_eta.dat:
+# idx 0: Re600_Pe60
+# idx 1: Re1000_Pe100
+# }}}
+
+
+# -------------------------------------------------------------
+
+perform_block_1 = 1
+
+# {{{ 
+
+if (perform_block_1) {
+
+
+set xlabel "Re_{B, eff}"
+set key top left
+set ylabel "VTurb"
+set title "Effective Re_B v VTurb"
+set log x
+set yrange [0:1]
+
+plot "tavg_bflux_corrected.dat" \
+   i 0 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "blue" title '(300,30)',\
+"" i 1 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "red" title '(600,30)',\
+"" i 2 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "black" title '(600,60)',\
+"" i 3 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "purple" title '(1000,10)',\
+"" i 4 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "forest-green" title '(1000,100)',\
+"" i 5 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "black" title '(600,60)',\
+"" i 6 u ((($6**2+$8**2)**(1.5))*$1/$3):20:21 w yerrorbars pt 7 ps 2 lc rgb "forest-green" title '(1000,100)',\
+
+} # end of block 1 }}}
+
+# -------------------------------------------------------------
+
+
+
+
+
+

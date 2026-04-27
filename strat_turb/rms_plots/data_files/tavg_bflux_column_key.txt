@@ -2,8 +2,8 @@ Column key for: tavg_bflux.dat
 (time-averaged output — one row per simulation)
 
   Col   1: Re
-  Col   2: B
-  Col   3: Pe
+  Col   2: Pe
+  Col   3: B
   Col   4: lb
   Col   5: ub
   Col   6: ux_rms
@@ -30,3 +30,5 @@ Column key for: tavg_bflux.dat
   Col  27: turb_brms_err
   Col  28: lam_brms
   Col  29: lam_brms_err
+  Col  30: uh_rms
+  Col  31: uh_rms_err
