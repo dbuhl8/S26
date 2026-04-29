@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from scipy.optimize import curve_fit
+from matplotlib.lines import Line2D
 
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams['font.serif'] = ['Times New Roman']
@@ -66,42 +66,65 @@ def valid_mask(FrT_inv, VTurb, y):
             & (FrT_inv > 0) & (y > 0) & (VTurb >= 0) & (VTurb <= 1))
 
 
-def collect_all(blocks, datasets, ycol):
-    """Gather all valid (FrT_inv, VTurb, y) across every dataset for fitting."""
-    fi, vt, yy = [], [], []
+def collect_xy(blocks, datasets, ycol):
+    """Pool (Fr*^{-1}, y) pairs across all datasets; discard non-finite/non-positive."""
+    xs, ys = [], []
     for idx, *_ in datasets:
         block = blocks[idx]
-        f = compute_Fr_eff_inv(block)
-        v = block[:, 19]   # vturb  (col 20)
+        x = compute_Fr_eff_inv(block)
         y = block[:, ycol]
-        m = valid_mask(f, v, y)
-        fi.append(f[m]); vt.append(v[m]); yy.append(y[m])
-    return np.concatenate(fi), np.concatenate(vt), np.concatenate(yy)
+        m = np.isfinite(x) & np.isfinite(y) & (x > 0) & (y > 0)
+        xs.append(x[m]); ys.append(y[m])
+    return np.concatenate(xs), np.concatenate(ys)
 
 
-def make_parity_panel(ax, blocks, datasets, ycol, recon_func,
-                      actual_label, pred_label, quantity_name):
-    # Fit c_turb, c_lam on pooled data
-    FrT_inv_all, VTurb_all, y_all = collect_all(blocks, datasets, ycol)
-    popt, _ = curve_fit(recon_func, (FrT_inv_all, VTurb_all), y_all,
-                        p0=[1.0, 1.0], maxfev=10000)
-    c_turb, c_lam = popt
+def fit_amplitude(x, y, slope):
+    """Fit amplitude a for  y = a * x^slope  in log space (slope fixed)."""
+    return np.exp(np.mean(np.log(y) - slope * np.log(x)))
+
+
+def make_parity_panel(ax, blocks, datasets,
+                      ycol_total, ycol_turb, slope_turb, ycol_lam, slope_lam,
+                      recon_func, actual_label, pred_label, quantity_name):
+    # Fit each coefficient from its own decomposed component with fixed slope.
+    # c_turb from turb_component = c_turb * Fr^slope_turb
+    # c_lam  from lam_component  = c_lam  * Fr^slope_lam
+    x_t, y_t = collect_xy(blocks, datasets, ycol_turb)
+    x_l, y_l = collect_xy(blocks, datasets, ycol_lam)
+    c_turb = fit_amplitude(x_t, y_t, slope_turb)
+    c_lam  = fit_amplitude(x_l, y_l, slope_lam)
     print(f"{quantity_name}: c_turb = {c_turb:.4e},  c_lam = {c_lam:.4e}")
 
     all_actual, all_pred = [], []
+    has_open = False
 
     for idx, label, color, marker in datasets:
-        block  = blocks[idx]
+        block   = blocks[idx]
         FrT_inv = compute_Fr_eff_inv(block)
         VTurb   = block[:, 19]
-        y       = block[:, ycol]
+        y       = block[:, ycol_total]
+        ReG     = block[:, 17] / block[:, 2]   # mdisp / B
         m = valid_mask(FrT_inv, VTurb, y)
         if not m.any():
             continue
 
-        y_pred = recon_func((FrT_inv[m], VTurb[m]), c_turb, c_lam)
-        ax.scatter(y_pred, y[m], color=color, marker=marker,
-                   s=60, zorder=3, label=label)
+        y_pred  = recon_func((FrT_inv[m], VTurb[m]), c_turb, c_lam)
+        ReG_m   = ReG[m]
+        hi      = ReG_m >= 1   # filled
+        lo      = ReG_m <  1   # open
+
+        # Re_G >= 1: filled markers (carry the dataset label)
+        if hi.any():
+            ax.scatter(y_pred[hi], y[m][hi], color=color, marker=marker,
+                       s=60, zorder=3, label=label)
+
+        # Re_G < 1: open (hollow) markers, same color/shape, no extra label
+        if lo.any():
+            ax.scatter(y_pred[lo], y[m][lo],
+                       facecolors='none', edgecolors=color, marker=marker,
+                       s=60, zorder=3, linewidths=1.5)
+            has_open = True
+
         all_actual.append(y[m])
         all_pred.append(y_pred)
 
@@ -118,7 +141,7 @@ def make_parity_panel(ax, blocks, datasets, ycol, recon_func,
     ax.tick_params(labelsize=15)
     ax.set_aspect('equal', adjustable='datalim')
 
-    return c_turb, c_lam
+    return c_turb, c_lam, has_open
 
 
 def main():
@@ -135,23 +158,35 @@ def main():
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    make_parity_panel(
+    _, _, has_open_b = make_parity_panel(
         axes[0], blocks, datasets,
-        ycol=13, recon_func=recon_brms,
+        ycol_total=13, ycol_turb=25, slope_turb=1.5,
+                       ycol_lam=27,  slope_lam=1.0,
+        recon_func=recon_brms,
         actual_label=r'$b_\mathrm{rms}$',
         pred_label=r'$b_\mathrm{pred}$',
         quantity_name='brms',
     )
     make_parity_panel(
         axes[1], blocks, datasets,
-        ycol=9, recon_func=recon_wrms,
+        ycol_total=9,  ycol_turb=21, slope_turb=0.5,
+                       ycol_lam=23,  slope_lam=1.0,
+        recon_func=recon_wrms,
         actual_label=r'$w_\mathrm{rms}$',
         pred_label=r'$w_\mathrm{pred}$',
         quantity_name='wrms',
     )
 
-    # legend on first panel only
-    axes[0].legend(fontsize=11, loc='upper left')
+    # legend on first panel only; append open-marker proxy if needed
+    handles, labels = axes[0].get_legend_handles_labels()
+    if has_open_b:
+        proxy = Line2D([0], [0], marker='o', color='dimgray',
+                       markerfacecolor='none', markeredgewidth=1.5,
+                       markersize=8, linestyle='none',
+                       label=r'open: $Re_G < 1$')
+        handles.append(proxy)
+        labels.append(r'open: $Re_G < 1$')
+    axes[0].legend(handles, labels, fontsize=11, loc='upper left')
 
     fig.tight_layout()
     fig.savefig('reconstruction_plot.pdf')

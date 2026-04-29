@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.lines import Line2D
 
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams['font.serif'] = ['Times New Roman']
@@ -68,17 +69,18 @@ def fit_amplitude(x, y, slope):
     return np.exp(np.mean(np.log(y[mask]) - slope * np.log(x[mask])))
 
 
-def collect_component(blocks, datasets, ycol, slope):
-    """Pool all valid (Fr_eff_inv, y) and return the fitted amplitude."""
+def collect_component(blocks, datasets, ycol, slope, vturb_min=0.0, vturb_max=1.0):
+    """Pool valid (Fr_eff_inv, y) restricted to vturb_min <= VTurb <= vturb_max."""
     all_x, all_y = [], []
     for idx, *_ in datasets:
         block = blocks[idx]
         x    = compute_Fr_eff_inv(block)
         xerr = compute_Fr_eff_inv_err(block)
         y    = block[:, ycol]
-        # Use the same valid mask as brms_wrms_plot.py (requires finite x, xerr, y > 0)
+        vt   = block[:, 19]   # VTurb (col 20)
         mask = (np.isfinite(x) & np.isfinite(xerr) & np.isfinite(y)
-                & (x > 0) & (y > 0))
+                & (x > 0) & (y > 0)
+                & (vt >= vturb_min) & (vt <= vturb_max))
         all_x.append(x[mask])
         all_y.append(y[mask])
     all_x = np.concatenate(all_x)
@@ -109,12 +111,13 @@ def main():
         (6, 'Stoch (1000,100)', GREEN,     '^'),
     ]
 
-    # Fit amplitudes from the individual component plots, matching brms_wrms_plot.py exactly
+    # Fit each amplitude from its own component, restricted to the regime where
+    # that component dominates: VTurb > 0.5 for turbulent, VTurb < 0.5 for laminar.
     # Columns (0-based): turb_brms=25, lam_brms=27, turb_wrms=21, lam_wrms=23
-    a_b_turb = collect_component(blocks, datasets, ycol=25, slope=-1.5)
-    a_b_lam  = collect_component(blocks, datasets, ycol=27, slope=-1.0)
-    a_w_turb = collect_component(blocks, datasets, ycol=21, slope=-0.5)
-    a_w_lam  = collect_component(blocks, datasets, ycol=23, slope=-1.0)
+    a_b_turb = collect_component(blocks, datasets, ycol=25, slope=-1.5, vturb_min=0.5)
+    a_b_lam  = collect_component(blocks, datasets, ycol=27, slope=-1.0, vturb_max=0.5)
+    a_w_turb = collect_component(blocks, datasets, ycol=21, slope=-0.5, vturb_min=0.5)
+    a_w_lam  = collect_component(blocks, datasets, ycol=23, slope=-1.0, vturb_max=0.5)
 
     C_turb = a_w_turb * a_b_turb
     C_lam  = a_w_lam  * a_b_lam
@@ -126,11 +129,13 @@ def main():
     fig, ax = plt.subplots(figsize=(7, 6))
 
     all_pred, all_actual = [], []
+    has_open = False
 
     for idx, label, color, marker in datasets:
         block      = blocks[idx]
         Fr_eff_inv = compute_Fr_eff_inv(block)
         VTurb      = block[:, 19]       # vturb (col 20)
+        ReG        = block[:, 17] / block[:, 2]   # mdisp / B
         y          = compute_bflux(block)
         y_err      = compute_bflux_err(block)
         m = valid_mask_bflux(Fr_eff_inv, VTurb, y)
@@ -138,10 +143,21 @@ def main():
             continue
 
         y_pred = predict_bflux(Fr_eff_inv[m], VTurb[m], C_turb, C_lam)
+        ReG_m  = ReG[m]
+        hi     = ReG_m >= 1   # filled
+        lo     = ReG_m <  1   # open
 
-        ax.errorbar(y[m], y_pred, yerr=y_err[m],
-                    fmt=marker, color=color, markersize=7,
-                    capsize=3, linestyle='none', label=label, zorder=3)
+        if hi.any():
+            ax.errorbar(y[m][hi], y_pred[hi], yerr=y_err[m][hi],
+                        fmt=marker, color=color, markersize=7,
+                        capsize=3, linestyle='none', label=label, zorder=3)
+
+        if lo.any():
+            ax.errorbar(y[m][lo], y_pred[lo], yerr=y_err[m][lo],
+                        fmt=marker, color=color, markersize=7,
+                        capsize=3, linestyle='none', zorder=3,
+                        markerfacecolor='none', markeredgewidth=1.5)
+            has_open = True
 
         all_pred.append(y_pred)
         all_actual.append(y[m])
@@ -157,9 +173,18 @@ def main():
     ax.set_yscale('log')
     ax.set_xlabel(r'$\langle wb \rangle$', fontsize=20)
     ax.set_ylabel(r'$\langle wb \rangle_\mathrm{pred}$', fontsize=20)
-    ax.legend(fontsize=12, loc='upper left')
     ax.tick_params(labelsize=15)
     ax.set_aspect('equal', adjustable='datalim')
+
+    handles, labels = ax.get_legend_handles_labels()
+    if has_open:
+        proxy = Line2D([0], [0], marker='o', color='dimgray',
+                       markerfacecolor='none', markeredgewidth=1.5,
+                       markersize=8, linestyle='none',
+                       label=r'open: $Re_G < 1$')
+        handles.append(proxy)
+        labels.append(r'open: $Re_G < 1$')
+    ax.legend(handles, labels, fontsize=12, loc='upper left')
 
     fig.tight_layout()
     fig.savefig('bflux_reconstruction.pdf')
