@@ -38,13 +38,14 @@ wz = db.FD6X(uy, Nx, dx) - db.FD6Y(ux, Ny, dy)
 wy = db.FD6Z(ux, Nz, dz) - db.FD6X(uz, Nx, dx)
 wx = db.FD6Y(uz, Ny, dy) - db.FD6Z(uy, Nz, dz)
 
+u_rms = np.sqrt(np.mean(ux**2 + uy**2 + uz**2))
 del ux, uy
 
 # colour limits
-wzmax = np.abs(wz).max()
-wymax = np.abs(wy).max()
-wxmax = np.abs(wx).max()
-wmax  = max(wzmax, wymax, wxmax)   # shared limit across all vorticity faces
+# vorticity clim: U_rms / gz gives the physically motivated shear scale;
+# vort_clim_factor lets you brighten (<1) or darken (>1) the vorticity colours
+vort_clim_factor = 1.0
+wmax  = vort_clim_factor * u_rms / gz
 uzmax = np.abs(uz).max() / 2
 
 cmap_obj = plt.get_cmap('RdBu_r')
@@ -55,15 +56,7 @@ def face_rgba(data, vmax):
     return cmap_obj(norm(data))
 
 def clean_ax(ax):
-    """Remove all axis decoration: panes, grid, ticks, and spine lines."""
-    for axis in (ax.xaxis, ax.yaxis, ax.zaxis):
-        axis.pane.fill = False
-        axis.pane.set_edgecolor('none')
-        axis.line.set_color((0, 0, 0, 0))   # hide the corner spine lines
-    ax.grid(False)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_zticks([])
+    ax.set_axis_off()
 
 def plot_bbox(ax, top_data, front_data, side_data, vmax_top, vmax_front, vmax_side):
     """
@@ -74,32 +67,35 @@ def plot_bbox(ax, top_data, front_data, side_data, vmax_top, vmax_front, vmax_si
       front – XZ plane at y = 0   (index  0 along y)
       side  – YZ plane at x = 0   (index  0 along x)
     """
-    # top face ─── XY plane at z = gz (ceiling of the domain)
-    Xt, Yt = np.meshgrid(x, y)
-    Zt = gz * np.ones_like(Xt)
-    ax.plot_surface(Xt, Yt, Zt,
-                    facecolors=face_rgba(top_data, vmax_top),
-                    shade=False, rcount=Ny, ccount=Nx)
+    # z_wall extends to gz so the wall faces are flush with the top face
+    z_wall = np.linspace(0, gz, Nz)
 
     # front face ── XZ plane at y = 0
-    Xf, Zf = np.meshgrid(x, z)
+    Xf, Zf = np.meshgrid(x, z_wall)
     Yf = np.zeros_like(Xf)
     ax.plot_surface(Xf, Yf, Zf,
                     facecolors=face_rgba(front_data, vmax_front),
                     shade=False, rcount=Nz, ccount=Nx)
 
     # side face ─── YZ plane at x = 0
-    Ys, Zs = np.meshgrid(y, z)
+    Ys, Zs = np.meshgrid(y, z_wall)
     Xs = np.zeros_like(Ys)
     ax.plot_surface(Xs, Ys, Zs,
                     facecolors=face_rgba(side_data, vmax_side),
                     shade=False, rcount=Nz, ccount=Ny)
 
+    # top face ─── XY plane at z = gz (plotted last so painter's algorithm keeps it on top)
+    Xt, Yt = np.meshgrid(x, y)
+    Zt = gz * np.ones_like(Xt)
+    ax.plot_surface(Xt, Yt, Zt,
+                    facecolors=face_rgba(top_data, vmax_top),
+                    shade=False, rcount=Ny, ccount=Nx)
+
     ax.set_xlim(0, gx)
     ax.set_ylim(0, gy)
     ax.set_zlim(0, gz)
-    ax.set_box_aspect((1, 1, 1))   # cube-shaped box so the top face is visible
-    ax.view_init(elev=25, azim=225)
+    ax.set_box_aspect((4, 4, 1))   # match domain proportions: 4π × 4π × π
+    ax.view_init(elev=35, azim=225)
     clean_ax(ax)
 
 # ── single figure: vorticity (left) and uz (right) ───────────────────────────
