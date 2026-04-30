@@ -107,15 +107,19 @@ else:
     steady_Re1000_Pe10_bounds = [[35, 40], [35, 70], [94, 95], [62, 63]]
     steady_Re1000_Pe10_params = [(1000, 10, 3), (1000, 10, 100), (1000, 10, 1000)]
 
+    steady_Re600_Pe600 = ['horizontal-shear/Re600_Pe600_B100/']
+    steady_Re600_Pe600_bounds = [[100, 125]]
+    steady_Re600_Pe600_params = [(600, 600, 100)]
+
     steady_simulations = [steady_Re600_Pe60, steady_Re600_Pe30,
                           steady_Re1000_Pe100, steady_Re300_Pe30,
-                          steady_Re1000_Pe10]
+                          steady_Re1000_Pe10, steady_Re600_Pe600]
     steady_bounds = [steady_Re600_Pe60_bounds, steady_Re600_Pe30_bounds,
                      steady_Re1000_Pe100_bounds, steady_Re300_Pe30_bounds,
-                     steady_Re1000_Pe10_bounds]
+                     steady_Re1000_Pe10_bounds, steady_Re600_Pe600_bounds]
     steady_params = [steady_Re600_Pe60_params, steady_Re600_Pe30_params,
                      steady_Re1000_Pe100_params, steady_Re300_Pe30_params,
-                     steady_Re1000_Pe10_params]
+                     steady_Re1000_Pe10_params, steady_Re600_Pe600_params]
 
 # ---------------------------------------------------------------------------
 # Combine into a single list in the desired index order:
@@ -124,19 +128,20 @@ else:
 #   Index group 2: Re 600  Pe 60  steady
 #   Index group 3: Re 1000 Pe 10  steady
 #   Index group 4: Re 1000 Pe 100 steady
-#   Index group 5: Re 600  Pe 60  stoch
-#   Index group 6: Re 1000 Pe 100 stoch
-#   Index group 7: Re 300  Pe 30  stoch
+#   Index group 5: Re 600  Pe 600 steady  (Pr=1)
+#   Index group 6: Re 600  Pe 60  stoch
+#   Index group 7: Re 1000 Pe 100 stoch
+#   Index group 8: Re 300  Pe 30  stoch
 # (each group spans multiple indices, one per B value)
 # ---------------------------------------------------------------------------
 simulations = [steady_Re300_Pe30, steady_Re600_Pe30, steady_Re600_Pe60,
-               steady_Re1000_Pe10, steady_Re1000_Pe100,
+               steady_Re1000_Pe10, steady_Re1000_Pe100, steady_Re600_Pe600,
                stoch_Re600_Pe60, stoch_Re1000_Pe100, stoch_Re300_Pe30]
 bounds = [steady_Re300_Pe30_bounds, steady_Re600_Pe30_bounds, steady_Re600_Pe60_bounds,
-          steady_Re1000_Pe10_bounds, steady_Re1000_Pe100_bounds,
+          steady_Re1000_Pe10_bounds, steady_Re1000_Pe100_bounds, steady_Re600_Pe600_bounds,
           stoch_Re600_Pe60_bounds, stoch_Re1000_Pe100_bounds, stoch_Re300_Pe30_bounds]
 params = [steady_Re300_Pe30_params, steady_Re600_Pe30_params, steady_Re600_Pe60_params,
-          steady_Re1000_Pe10_params, steady_Re1000_Pe100_params,
+          steady_Re1000_Pe10_params, steady_Re1000_Pe100_params, steady_Re600_Pe600_params,
           stoch_Re600_Pe60_params, stoch_Re1000_Pe100_params, stoch_Re300_Pe30_params]
 
 # flat dict: dir_path -> (Re, Pe, B)
