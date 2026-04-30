@@ -47,8 +47,16 @@ def valid_mask(x, xerr, y, yerr):
 
 
 def fit_amplitude(x, y, slope):
+    """Fix slope, fit amplitude in log-log space."""
     mask = (x > 0) & (y > 0) & np.isfinite(x) & np.isfinite(y)
     return np.exp(np.mean(np.log(y[mask]) - slope * np.log(x[mask])))
+
+
+def fit_powerlaw(x, y):
+    """Free power-law fit (both slope and amplitude) in log-log space."""
+    mask = (x > 0) & (y > 0) & np.isfinite(x) & np.isfinite(y)
+    slope, logA = np.polyfit(np.log10(x[mask]), np.log10(y[mask]), 1)
+    return 10**logA, slope
 
 
 # ── Fr* = sqrt(B) / uh ──────────────────────────────────────────────────────
@@ -91,14 +99,38 @@ def compute_xerr_FrT(block):
     return err / FrT**2          # σ(1/FrT)
 
 
+# ── Print fit comparison table ───────────────────────────────────────────────
+
+def print_fit_comparison(fit_results, label):
+    row_names = ['Total (free fit)', 'Turb  (fixed slope)', 'Lam   (fixed slope)']
+    print(f"\n{'='*68}")
+    print(f"  Fit comparison — {label}")
+    print(f"{'='*68}")
+    print(f"  {'':22s}  {'wrms':>22s}  {'brms':>22s}")
+    print(f"  {'':22s}  {'amplitude':>11s} {'slope':>9s}  {'amplitude':>11s} {'slope':>9s}")
+    print(f"  {'-'*64}")
+    for row, name in enumerate(row_names):
+        w = fit_results.get((row, 0))
+        b = fit_results.get((row, 1))
+        ws = f"  {w[0]:.4e}  {w[1]:+.3f}" if w else f"  {'N/A':>11s}  {'N/A':>7s}"
+        bs = f"  {b[0]:.4e}  {b[1]:+.3f}" if b else f"  {'N/A':>11s}  {'N/A':>7s}"
+        print(f"  {name:22s}{ws}{bs}")
+    print(f"{'='*68}\n")
+
+
 # ── Figure builder ───────────────────────────────────────────────────────────
 
 def make_combined_figure(blocks, datasets, wrms_panels, brms_panels,
-                         compute_x_fn, compute_xerr_fn, xlabel, filename):
+                         compute_x_fn, compute_xerr_fn, xlabel, x_sym, filename):
     """
     3 rows × 2 cols:
       col 0 = wrms   col 1 = brms
       row 0 = total  row 1 = turb  row 2 = lam
+
+    panel spec: (ycol, yerrcol, ylabel, slope, slope_label)
+      slope = float  → fix slope, fit amplitude only
+      slope = 'free' → fit both slope and amplitude
+      slope = None   → no fit line
     """
     fig, axes = plt.subplots(3, 2, figsize=(13, 16), sharex=True,
                              constrained_layout=False)
@@ -107,11 +139,11 @@ def make_combined_figure(blocks, datasets, wrms_panels, brms_panels,
 
     legend_handles = []
     legend_labels  = []
+    fit_results = {}   # (row, col) -> (amplitude, slope)
 
     for row in range(3):
         for col, panels in enumerate([wrms_panels, brms_panels]):
-            ax = panels[row]   # panel spec tuple
-            ycol, yerrcol, ylabel, slope, slope_label = ax
+            ycol, yerrcol, ylabel, slope, slope_label = panels[row]
             ax = axes[row, col]
 
             all_x, all_y = [], []
@@ -144,44 +176,46 @@ def make_combined_figure(blocks, datasets, wrms_panels, brms_panels,
             ax.tick_params(labelsize=FONT_TICK, which='both')
             ax.set_ylabel(ylabel, fontsize=FONT_LABEL)
 
-            # Add power-law line and annotate in corner away from data
             if slope is not None and all_x:
                 x_cat = np.concatenate(all_x)
                 y_cat = np.concatenate(all_y)
-                a = fit_amplitude(x_cat, y_cat, slope)
+
+                if slope == 'free':
+                    a, use_slope = fit_powerlaw(x_cat, y_cat)
+                    annot = fr'$\propto ({x_sym})^{{{use_slope:.2f}}}$'
+                else:
+                    a = fit_amplitude(x_cat, y_cat, slope)
+                    use_slope = slope
+                    annot = slope_label
+
+                fit_results[(row, col)] = (a, use_slope)
                 x_line = np.logspace(np.log10(x_cat.min()),
                                      np.log10(x_cat.max()), 300)
-                ax.plot(x_line, a * x_line**slope,
+                ax.plot(x_line, a * x_line**use_slope,
                         color='black', linestyle='--', linewidth=2.0)
-                # Text box in upper-right (data thins out there for neg slopes)
-                ax.text(0.97, 0.97, slope_label,
+                ax.text(0.97, 0.97, annot,
                         transform=ax.transAxes, ha='right', va='top',
                         fontsize=FONT_LEG,
                         bbox=dict(facecolor='white', alpha=0.85,
                                   edgecolor='lightgray', boxstyle='round,pad=0.3'))
 
-            # Clamp y-axis to the data+errorbars range (prevents fit lines
-            # from expanding the view beyond where the data lives)
             if all_y_lo and all_y_hi:
                 y_lo_cat = np.concatenate(all_y_lo)
                 y_hi_cat = np.concatenate(all_y_hi)
                 pos_lo = y_lo_cat[y_lo_cat > 0]
-                log_pad = 0.15   # decades of breathing room
+                log_pad = 0.15
                 log_ymin = np.log10(pos_lo.min() if len(pos_lo) else y_hi_cat.min()) - log_pad
                 log_ymax = np.log10(y_hi_cat.max()) + log_pad
                 ax.set_ylim(10**log_ymin, 10**log_ymax)
 
-            # x labels only on bottom row
             if row == 2:
                 ax.set_xlabel(xlabel, fontsize=FONT_LABEL)
             else:
                 ax.tick_params(labelbottom=False)
 
-    # Column headers
     axes[0, 0].set_title(r'$w_\mathrm{rms}$', fontsize=FONT_LABEL + 2, pad=6)
     axes[0, 1].set_title(r'$b_\mathrm{rms}$', fontsize=FONT_LABEL + 2, pad=6)
 
-    # Figure-level dataset legend below the panels
     fig.legend(legend_handles, legend_labels,
                loc='lower center', ncol=4,
                bbox_to_anchor=(0.5, 0.01),
@@ -192,6 +226,8 @@ def make_combined_figure(blocks, datasets, wrms_panels, brms_panels,
     fig.savefig(filename + '.pdf', bbox_inches='tight')
     fig.savefig(filename + '.png', dpi=150, bbox_inches='tight')
     print(f"Saved {filename}.pdf and {filename}.png")
+
+    print_fit_comparison(fit_results, filename)
 
 
 def main():
@@ -209,39 +245,39 @@ def main():
 
     # ── Fr* panels ──────────────────────────────────────────────────────────
     wrms_Fr = [
-        (9,  10, r'$w_\mathrm{rms}$',             None,  None),
-        (21, 22, r'$w_\mathrm{rms,\,turb}$',      -0.5,  r'$\propto (Fr^*)^{-1/2}$'),
-        (23, 24, r'$w_\mathrm{rms,\,lam}$',       -1.0,  r'$\propto (Fr^*)^{-1}$'),
+        (9,  10, r'$w_\mathrm{rms}$',          'free', None),
+        (21, 22, r'$w_\mathrm{rms,\,turb}$',   -0.5,  r'$\propto (Fr^*)^{-1/2}$'),
+        (23, 24, r'$w_\mathrm{rms,\,lam}$',    -1.0,  r'$\propto (Fr^*)^{-1}$'),
     ]
     brms_Fr = [
-        (13, 14, r'$b_\mathrm{rms}$',             None,  None),
-        (25, 26, r'$b_\mathrm{rms,\,turb}$',      -1.5,  r'$\propto (Fr^*)^{-3/2}$'),
-        (27, 28, r'$b_\mathrm{rms,\,lam}$',       -1.0,  r'$\propto (Fr^*)^{-1}$'),
+        (13, 14, r'$b_\mathrm{rms}$',          'free', None),
+        (25, 26, r'$b_\mathrm{rms,\,turb}$',   -1.5,  r'$\propto (Fr^*)^{-3/2}$'),
+        (27, 28, r'$b_\mathrm{rms,\,lam}$',    -1.0,  r'$\propto (Fr^*)^{-1}$'),
     ]
 
     make_combined_figure(
         blocks, datasets, wrms_Fr, brms_Fr,
         compute_x_Fr, compute_xerr_Fr,
-        r'$(Fr^*)^{-1}$',
+        r'$(Fr^*)^{-1}$', r'Fr^*{}^{-1}',
         'brms_wrms_combined_Fr'
     )
 
     # ── Fr_turb panels ───────────────────────────────────────────────────────
     wrms_FrT = [
-        (9,  10, r'$w_\mathrm{rms}$',             None,  None),
-        (21, 22, r'$w_\mathrm{rms,\,turb}$',      -0.5,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-1/2}$'),
-        (23, 24, r'$w_\mathrm{rms,\,lam}$',       -1.0,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-1}$'),
+        (9,  10, r'$w_\mathrm{rms}$',          'free', None),
+        (21, 22, r'$w_\mathrm{rms,\,turb}$',   -0.5,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-1/2}$'),
+        (23, 24, r'$w_\mathrm{rms,\,lam}$',    -1.0,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-1}$'),
     ]
     brms_FrT = [
-        (13, 14, r'$b_\mathrm{rms}$',             None,  None),
-        (25, 26, r'$b_\mathrm{rms,\,turb}$',      -1.5,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-3/2}$'),
-        (27, 28, r'$b_\mathrm{rms,\,lam}$',       -1.0,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-1}$'),
+        (13, 14, r'$b_\mathrm{rms}$',          'free', None),
+        (25, 26, r'$b_\mathrm{rms,\,turb}$',   -1.5,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-3/2}$'),
+        (27, 28, r'$b_\mathrm{rms,\,lam}$',    -1.0,  r'$\propto (Fr_\mathrm{turb}^{-1})^{-1}$'),
     ]
 
     make_combined_figure(
         blocks, datasets, wrms_FrT, brms_FrT,
         compute_x_FrT, compute_xerr_FrT,
-        r'$Fr_\mathrm{turb}^{-1}$',
+        r'$Fr_\mathrm{turb}^{-1}$', r'Fr_\mathrm{turb}^{-1}',
         'brms_wrms_combined_turbFr'
     )
 

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from matplotlib.ticker import LogLocator, LogFormatterMathtext
 
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams['font.serif'] = ['Times New Roman']
@@ -17,9 +18,12 @@ FONT_LABEL = 24
 FONT_TICK  = 18
 FONT_LEG   = 14
 
-# VTurb range used to fit the kick-up power law — adjust as needed
+# VTurb thresholds for the two fit regions
 FIT_VTURB_MIN = 0.01
-FIT_VTURB_MAX = 0.80
+FIT_VTURB_MID = 0.65   # boundary between kick-up and taper regions
+
+FIT_COLOR_KICKUP = 'k'
+FIT_COLOR_TAPER  = '#AA3377'   # muted rose (Paul Tol qualitative palette)
 
 
 def load_dat_blocks(filepath):
@@ -61,29 +65,32 @@ def compute_xerr_ReG(block):
     return block[:, 18] / block[:, 2]          # mdisp_err / B
 
 
-# ── kick-up power-law fit ────────────────────────────────────────────────────
+# ── logarithmic fit over a VTurb sub-range ───────────────────────────────────
 
-def fit_kickup(blocks, datasets, x_fn):
-    """Fit VTurb = a * x^b in log-log space, restricted to the transition region."""
+def fit_region(blocks, datasets, x_fn, vturb_lo, vturb_hi):
+    """Fit VTurb = a*ln(x) + b for points with VTurb in [vturb_lo, vturb_hi].
+    Returns (a, b, x_min, x_max) or None if fewer than 2 points qualify."""
     xs, ys = [], []
     for idx, *_ in datasets:
         block = blocks[idx]
         x = x_fn(block)
-        y = block[:, 19]   # VTurb
+        y = block[:, 19]
         mask = (np.isfinite(x) & np.isfinite(y) & (x > 0)
-                & (y >= FIT_VTURB_MIN) & (y <= FIT_VTURB_MAX))
+                & (y >= vturb_lo) & (y <= vturb_hi))
         xs.append(x[mask])
         ys.append(y[mask])
     xs = np.concatenate(xs)
     ys = np.concatenate(ys)
-    slope, intercept = np.polyfit(np.log10(xs), np.log10(ys), 1)
-    return 10**intercept, slope, xs.min(), xs.max()
+    if len(xs) < 2:
+        return None
+    a, b = np.polyfit(np.log(xs), ys, 1)
+    return a, b, xs.min(), xs.max()
 
 
 # ── panel plotter ─────────────────────────────────────────────────────────────
 
 def plot_panel(ax, blocks, datasets, x_fn, x_err_fn,
-               xlabel, x_sym, show_ylabel, show_legend):
+               xlabel, x_sym, show_ylabel, kickup_vmin=None):
 
     for idx, label, color, marker in datasets:
         block = blocks[idx]
@@ -105,29 +112,53 @@ def plot_panel(ax, blocks, datasets, x_fn, x_err_fn,
 
     if show_ylabel:
         ax.set_ylabel(r'$V_\mathrm{Turb}$', fontsize=FONT_LABEL)
-    if show_legend:
-        ax.legend(fontsize=FONT_LEG, loc='upper left')
 
-    # ── kick-up power law ────────────────────────────────────────────────────
-    a, b, x_lo, x_hi = fit_kickup(blocks, datasets, x_fn)
-    x_line = np.logspace(np.log10(x_lo), np.log10(x_hi), 300)
-    y_line = a * x_line**b
-    ax.plot(x_line, y_line, 'k--', linewidth=2.0, zorder=5)
+    # ── kick-up fit ──────────────────────────────────────────────────────────
+    vmin_k = kickup_vmin if kickup_vmin is not None else FIT_VTURB_MIN
+    res_k = fit_region(blocks, datasets, x_fn, vmin_k, FIT_VTURB_MID)
+    res_t = fit_region(blocks, datasets, x_fn, FIT_VTURB_MID, 1.05)
 
-    # Annotate with the fitted slope; wrap x_sym in () so nested ^ is valid LaTeX
-    slope_num = int(round(1.0 / b)) if abs(1.0/b - round(1.0/b)) < 0.07 else None
-    if slope_num is not None:
-        label_str = fr'$\propto ({x_sym})^{{1/{slope_num}}}$'
-    else:
-        label_str = fr'$\propto ({x_sym})^{{{b:.2f}}}$'
+    # Determine non-overlapping x extents
+    if res_k is not None and res_t is not None:
+        a_k, b_k, x_lo_k, x_hi_k = res_k
+        a_t, b_t, x_lo_t, x_hi_t = res_t
+        if x_lo_t >= x_hi_k:
+            x_end_k, x_start_t = x_hi_k, x_lo_t
+        else:
+            # Ranges overlap — split at the log-midpoint
+            x_split = 10 ** ((np.log10(x_lo_t) + np.log10(x_hi_k)) / 2)
+            x_end_k, x_start_t = x_split, x_split
+    elif res_k is not None:
+        a_k, b_k, x_lo_k, x_hi_k = res_k
+        x_end_k = x_hi_k
+    elif res_t is not None:
+        a_t, b_t, x_lo_t, x_hi_t = res_t
+        x_start_t = x_lo_t
 
-    ax.text(0.97, 0.05, label_str,
-            transform=ax.transAxes, ha='right', va='bottom',
-            fontsize=FONT_LEG + 1,
-            bbox=dict(facecolor='white', alpha=0.85,
-                      edgecolor='lightgray', boxstyle='round,pad=0.3'))
+    fit_handles, fit_labels = [], []
 
-    print(f"  {xlabel}: a = {a:.4e},  slope = {b:.4f}")
+    if res_k is not None:
+        x_line = np.logspace(np.log10(x_lo_k), np.log10(x_end_k), 300)
+        h, = ax.plot(x_line, a_k * np.log(x_line) + b_k,
+                     '--', color=FIT_COLOR_KICKUP, linewidth=2.0, zorder=5,
+                     label='_nolegend_')
+        fit_handles.append(h)
+        fit_labels.append(fr'$\propto {a_k:.2f}\ln({x_sym})$')
+        print(f"  kick-up {xlabel}: a = {a_k:.4f},  b = {b_k:.4f}")
+
+    if res_t is not None:
+        x_line = np.logspace(np.log10(x_start_t), np.log10(x_hi_t), 300)
+        h, = ax.plot(x_line, a_t * np.log(x_line) + b_t,
+                     '--', color=FIT_COLOR_TAPER, linewidth=2.0, zorder=5,
+                     label='_nolegend_')
+        fit_handles.append(h)
+        fit_labels.append(fr'$\propto {a_t:.2f}\ln({x_sym})$')
+        print(f"  taper   {xlabel}: a = {a_t:.4f},  b = {b_t:.4f}")
+
+    if fit_handles:
+        ax.legend(handles=fit_handles, labels=fit_labels,
+                  loc='upper left', fontsize=FONT_LEG,
+                  frameon=True, framealpha=0.85)
 
 
 def main():
@@ -143,20 +174,33 @@ def main():
     ]
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 6), sharey=True)
-    fig.subplots_adjust(wspace=0.08)
+    fig.subplots_adjust(wspace=0.08, bottom=0.30)
 
-    print("Kick-up power-law fits "
-          f"(VTurb in [{FIT_VTURB_MIN}, {FIT_VTURB_MAX}]):")
+    print(f"Logarithmic fits (kick-up: VTurb in [{FIT_VTURB_MIN}, {FIT_VTURB_MID}],"
+          f" taper: VTurb in [{FIT_VTURB_MID}, 1.05]):")
 
     plot_panel(axes[0], blocks, datasets,
                compute_x_Reb, compute_xerr_Reb,
                xlabel=r'$Re_B^*$', x_sym=r'Re_B^*',
-               show_ylabel=True, show_legend=True)
+               show_ylabel=True, kickup_vmin=0.05)
 
     plot_panel(axes[1], blocks, datasets,
                compute_x_ReG, compute_xerr_ReG,
                xlabel=r'$Re_G$', x_sym=r'Re_G',
-               show_ylabel=False, show_legend=False)
+               show_ylabel=False)
+
+    # force every integer power of 10 to show on the ReG axis
+    axes[1].xaxis.set_major_locator(LogLocator(base=10.0, subs=(1.0,), numticks=20))
+    axes[1].xaxis.set_major_formatter(LogFormatterMathtext())
+    axes[1].tick_params(labelsize=FONT_TICK, which='both')
+
+    # shared legend below both panels
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels,
+               loc='lower center', ncol=4,
+               fontsize=FONT_LEG,
+               bbox_to_anchor=(0.5, 0.02),
+               frameon=True)
 
     fig.savefig('VTurb_combined.pdf', bbox_inches='tight')
     fig.savefig('VTurb_combined.png', dpi=150, bbox_inches='tight')
