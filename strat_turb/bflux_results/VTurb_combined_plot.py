@@ -155,6 +155,10 @@ def plot_panel(ax, blocks, datasets, x_fn, x_err_fn,
         fit_labels.append(fr'$\propto {a_t:.2f}\ln({x_sym})$')
         print(f"  taper   {xlabel}: a = {a_t:.4f},  b = {b_t:.4f}")
 
+    if res_k is not None and res_t is not None:
+        ReG_crit = np.exp((b_t - b_k) / (a_k - a_t))
+        print(f"  critical {xlabel}: {xlabel} = {ReG_crit:.4g}  (kick-up / taper intersection)")
+
     if fit_handles:
         ax.legend(handles=fit_handles, labels=fit_labels,
                   loc='upper left', fontsize=FONT_LEG,
