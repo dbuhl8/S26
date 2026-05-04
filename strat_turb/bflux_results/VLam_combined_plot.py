@@ -76,6 +76,7 @@ def fit_power_law(blocks, datasets, x_fn):
 
 
 def plot_panel(ax, blocks, datasets, x_fn, x_err_fn, xlabel, x_sym, show_ylabel):
+    all_y = []
     for idx, label, color, marker in datasets:
         block = blocks[idx]
         x    = x_fn(block)
@@ -90,9 +91,19 @@ def plot_panel(ax, blocks, datasets, x_fn, x_err_fn, xlabel, x_sym, show_ylabel)
                     fmt=marker, color=color, markersize=8,
                     capsize=3, linestyle='none', label=label,
                     elinewidth=1.2, capthick=1.2)
+        all_y.append(y[mask] - yerr[mask])   # include error bar extents
+        all_y.append(y[mask] + yerr[mask])
+
+    # set y limits with a small log-space margin around the data
+    all_y = np.concatenate(all_y)
+    all_y = all_y[all_y > 0]
+    log_pad = 0.08   # padding in decades
+    y_lo = 10 ** (np.log10(all_y.min()) - log_pad)
+    y_hi = 10 ** (np.log10(all_y.max()) + log_pad)
 
     ax.set_xscale('log')
     ax.set_yscale('log')
+    ax.set_ylim(y_lo, y_hi)
     ax.set_xlabel(xlabel, fontsize=FONT_LABEL)
     ax.tick_params(labelsize=FONT_TICK, which='both')
 
@@ -105,7 +116,7 @@ def plot_panel(ax, blocks, datasets, x_fn, x_err_fn, xlabel, x_sym, show_ylabel)
         x_line = np.logspace(np.log10(x_min), np.log10(x_max), 300)
         h, = ax.plot(x_line, C * x_line**(-0.25),
                      '--', color='k', linewidth=2.0, zorder=5)
-        fit_label = fr'${C:.3f}\,({x_sym})^{{-1/4}}$'
+        fit_label = fr'$\propto ({x_sym})^{{-1/4}}$'
         ax.legend(handles=[h], labels=[fit_label],
                   loc='upper right', fontsize=FONT_LEG,
                   frameon=True, framealpha=0.85)
@@ -120,8 +131,9 @@ def main():
         (2, 'Steady (600,60)',   DARK_BLUE, 'o'),
         (3, 'Steady (1000,10)',  VERMILLION,'o'),
         (4, 'Steady (1000,100)', GREEN,     'o'),
-        (5, 'Stoch (600,60)',    DARK_BLUE, '^'),
-        (6, 'Stoch (1000,100)', GREEN,     '^'),
+        (5, 'Steady (600,600)', PINK,      'o'),
+        (6, 'Stoch (600,60)',    DARK_BLUE, 'D'),
+        (7, 'Stoch (1000,100)', GREEN,     'D'),
     ]
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 6), sharey=True)

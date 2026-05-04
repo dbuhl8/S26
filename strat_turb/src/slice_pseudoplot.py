@@ -3,9 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.colors as colors
+import matplotlib.animation as animation
 from matplotlib import gridspec
 from matplotlib.offsetbox import AnchoredText
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.widgets import Slider
 from netCDF4 import MFDataset
 
 plt.rcParams["font.family"] = "Times New Roman"
@@ -67,8 +69,19 @@ uz =  np.array(cdf_filexy.variables["uz"][:])
 
 del ux_xy
 del uy_xy
-big_wz = wz[ptstp,:,:]
-big_uz = uz[ptstp,:,:]
+big_wz = np.zeros((2*Ny,2*Nx))
+big_wz[0:Ny,0:Nx] = wz[ptstp,:,:]
+big_wz[Ny:2*Ny,0:Nx] = wz[ptstp,:,:]
+big_wz[0:Ny,Nx:2*Nx] = wz[ptstp,:,:]
+big_wz[Ny:2*Ny,Nx:2*Nx] = wz[ptstp,:,:]
+#del wz
+
+big_uz = np.zeros((2*Ny,2*Nx))
+big_uz[0:Ny,0:Nx] = uz[ptstp,:,:]
+big_uz[Ny:2*Ny,0:Nx] = uz[ptstp,:,:]
+big_uz[0:Ny,Nx:2*Nx] = uz[ptstp,:,:]
+big_uz[Ny:2*Ny,Nx:2*Nx] = uz[ptstp,:,:]
+#del uz
 
 
 #uz_xz =  np.array(cdf_filexz.variables["uz"][:])
@@ -76,7 +89,7 @@ big_uz = uz[ptstp,:,:]
 
 # Finding max values for the colorbar
 #uzmax = np.max([uz_xz.max(), uz_yz.max(), uz_xy.max()])
-uzmax = (np.abs(uz).max())/2
+uzmax = (np.abs(big_uz).max())/2
 
 #print('Maximum; ux: ', uxmax, ', uy: ',\
     #uymax, ', uz: ', uzmax, ', temp: ',tempmax)
@@ -148,7 +161,7 @@ ax2 = fig.add_subplot(gs[1])
 
 
 #wz plot
-wz_top = ax1.imshow(wz[ptstp,:,:], norm=colors.Normalize(vmin=-wzmax,vmax=wzmax),
+wz_top = ax1.imshow(big_wz[:,:], norm=colors.Normalize(vmin=-wzmax,vmax=wzmax),
     cmap = 'RdYlBu_r', origin='lower')
 cb1 = fig.colorbar(wz_top, ax=ax1,fraction=0.02, pad=0.1, )
 #cb1.ax.tick_params(labelsize=fs-dfs)
@@ -158,7 +171,7 @@ ax1.set_title(r'$\omega_z$')
 ax1.set_ylabel(r'$y$',rotation=0,labelpad=10)
 ax1.set_xlabel(r'$x$')
 
-uz_top = ax2.imshow(uz[ptstp,:,:], norm=colors.Normalize(vmin=-uzmax,vmax=uzmax),
+uz_top = ax2.imshow(big_uz[:,:], norm=colors.Normalize(vmin=-uzmax,vmax=uzmax),
     cmap = 'seismic', origin='lower')
 cb2 = fig.colorbar(uz_top, ax=ax2,fraction=0.02, pad=0.1, )
 #cb1.ax.tick_params(labelsize=fs-dfs)
@@ -254,7 +267,33 @@ ax2.set_yticks([])
 
 
 
+# horizaontally oriented slider
+taxis = plt.axes([0.15, 0.02, 0.7, 0.03], facecolor='blue')
+staxis = Slider(taxis, 'Time', t[0], t[-1], valinit=t[0], valstep=dt)
+
 fig.tight_layout()
-plt.savefig('xyslice_pseudoplot.png', dpi=800, bbox_inches='tight')
-plt.savefig('xyslice_pseudoplot.pdf', bbox_inches='tight')
+# movie down vertical extent of domain
+def update_frame(frame):
+    big_wz[0:Ny,0:Nx] = wz[frame,:,:]
+    big_wz[Ny:2*Ny,0:Nx] = wz[frame,:,:]
+    big_wz[0:Ny,Nx:2*Nx] = wz[frame,:,:]
+    big_wz[Ny:2*Ny,Nx:2*Nx] = wz[frame,:,:]
+    big_uz[0:Ny,0:Nx] = uz[frame,:,:]
+    big_uz[Ny:2*Ny,0:Nx] = uz[frame,:,:]
+    big_uz[0:Ny,Nx:2*Nx] = uz[frame,:,:]
+    big_uz[Ny:2*Ny,Nx:2*Nx] = uz[frame,:,:]
+    wz_top.set_array(big_wz)
+    uz_top.set_array(big_uz)
+    staxis.set_val(t[frame]) 
+    plt.savefig('xyslice_frame{:0{}d}.png'.format(frame,5),dpi=800)
+    print('Done with frame: ', frame)
+    return (uz_top, wz_top)
+
+#for i in range(Nt):
+    #plots = update_frame(i)
+
+ani = animation.FuncAnimation(fig=fig,
+    func=update_frame,frames=Nt,interval=100,blit=True)
+ani.save('Om1B100Re1000Pe100_xyslice.gif')
+#plt.show()
 

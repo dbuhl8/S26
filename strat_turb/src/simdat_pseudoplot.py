@@ -2,13 +2,22 @@ import dbuhlMod as db
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib.colors import LinearSegmentedColormap
 from netCDF4 import MFDataset
 
-plt.rcParams["font.family"] = "Times New Roman"
-plt.rcParams["mathtext.fontset"] = 'stix'
-plt.rcParams["font.size"] = 16
+# Example CVD-safe hex colors (Blue to Orange)
+clors = ["#0072B2", "#E69F00"] 
+custom_cmap = LinearSegmentedColormap.from_list("cb_friendly", clors)
 
-ptstp = -1
+plt.rcParams["font.family"] = "serif"
+plt.rcParams["font.serif"] = ["Times New Roman"]
+plt.rcParams["mathtext.fontset"] = 'stix'
+
+FONT_LABEL = 24
+FONT_TICK  = 18
+FONT_LEG   = 14
+
+num_contours = 500
 
 # ── open simdat files ────────────────────────────────────────────────────────
 fn = 'simdat*.cdf'
@@ -20,119 +29,163 @@ print(cdf_file.variables)
 x = np.array(cdf_file.variables["x"])
 y = np.array(cdf_file.variables["y"])
 z = np.array(cdf_file.variables["z"])
-t = np.array(cdf_file.variables["t"][:])
+t_last = float(cdf_file.variables["t"][-1])
 Nx, Ny, Nz = len(x), len(y), len(z)
-Nt = len(t)
-print('Nt={}, Nx={}, Ny={}, Nz={}'.format(Nt, Nx, Ny, Nz))
+print('t={:.4f}, Nx={}, Ny={}, Nz={}'.format(t_last, Nx, Ny, Nz))
 
-gx, gy, gz = 4*np.pi, 4*np.pi, np.pi
+gx = float(cdf_file.variables["Gammax"][()])
+gy = float(cdf_file.variables["Gammay"][()])
+gz = float(cdf_file.variables["Gammaz"][()])
+Fr = 1./np.sqrt(float(cdf_file.variables["B_therm"][()]))
 dx, dy, dz = gx/Nx, gy/Ny, gz/Nz
 
-# ── load fields ──────────────────────────────────────────────────────────────
-ux = np.array(cdf_file.variables["ux"][:])
-uy = np.array(cdf_file.variables["uy"][:])
-uz = np.array(cdf_file.variables["uz"][:])
+z_phys = np.linspace(0, gz, Nz)
 
-# vorticity components (sign convention matches db.FD6X/FD6Y: returns -deriv)
-wz = db.FD6X(uy, Nx, dx) - db.FD6Y(ux, Ny, dy)
-wy = db.FD6Z(ux, Nz, dz) - db.FD6X(uz, Nx, dx)
-wx = db.FD6Y(uz, Ny, dy) - db.FD6Z(uy, Nz, dz)
+# ── load fields (last timestep only) ─────────────────────────────────────────
+ux = np.array(cdf_file.variables["ux"][-1:])
+uy = np.array(cdf_file.variables["uy"][-1:])
+uz = np.array(cdf_file.variables["uz"][-1:])
 
 u_rms = np.sqrt(np.mean(ux**2 + uy**2 + uz**2))
-del ux, uy
+uh_rms = np.sqrt(np.mean(ux**2 + uy**2))
+
+# ── vorticity on each face (slice first, differentiate in-plane only) ─────────
+# top face  (XY at z = gz, index -1): ω_z = ∂uy/∂x − ∂ux/∂y   → (Ny, Nx)
+wz_top = (db.FD6X(uy[:, 0:1, :, :], Nx, dx)
+        - db.FD6Y(ux[:, 0:1, :, :], Ny, dy))[0, 0]
+#print('Shape of wz_top: ', np.shape(wz_top))
+#print('Mean of wz_top: ', np.mean(wz_top))
+#print('STD of wz_top: ', np.std(wz_top))
+
+# front face (XZ at y = 0,  index  0): ω_y = ∂ux/∂z − ∂uz/∂x  → (Nz, Nx)
+uy_front = np.concatenate((uy[:,:,0:5,:],uy[:,:,Ny-5:,:]),axis=2)
+ux_front = np.concatenate((ux[:,:,0:5,:],ux[:,:,Ny-5:,:]),axis=2)
+uy_side = np.concatenate((uy[:,:,:,0:5],uy[:,:,:,Nx-5:]),axis=3)
+ux_side = np.concatenate((ux[:,:,:,0:5],ux[:,:,:,Nx-5:]),axis=3)
+
+del ux
+del uy
+
+wy_front = (db.FD6X(uy_front, Nx, dx)
+          - db.FD6Y(ux_front, 8, dy))[0, :, 0]
+
+# side face  (YZ at x = 0,  index  0): ω_x = ∂uz/∂y − ∂uy/∂z  → (Nz, Ny)
+wx_side = (db.FD6X(uy_side, 8, dx)
+         - db.FD6Y(ux_side, Ny, dy))[0, :, :, 0]
+
+# ── uz face slices ────────────────────────────────────────────────────────────
+uz_top   = uz[0, -1, :, :]
+uz_front = uz[0, :,  0, :]
+uz_side  = uz[0, :,  :, 0]
+uzmax = np.abs(uz).max() / 2
+del uz
 
 # colour limits
-# vorticity clim: U_rms / gz gives the physically motivated shear scale;
-# vort_clim_factor lets you brighten (<1) or darken (>1) the vorticity colours
-vort_clim_factor = 1.0
-wmax  = vort_clim_factor * u_rms / gz
-uzmax = np.abs(uz).max() / 2
+wmax = max(np.abs(wz_top).max(), np.abs(wy_front).max(), np.abs(wx_side).max())
+wmax = np.sqrt(uh_rms/Fr)
 
-cmap_obj = plt.get_cmap('RdBu_r')
+# ── 2D meshgrids for each face ───────────────────────────────────────────────
+X_xy, Y_xy = np.meshgrid(x, y)        # (Ny, Nx)
+X_xz, Z_xz = np.meshgrid(x, z_phys)  # (Nz, Nx)
+Y_yz, Z_yz = np.meshgrid(y, z_phys)  # (Nz, Ny)
 
-# ── helpers ──────────────────────────────────────────────────────────────────
-def face_rgba(data, vmax):
-    norm = colors.Normalize(vmin=-vmax, vmax=vmax)
-    return cmap_obj(norm(data))
+# ── bounding box edges ───────────────────────────────────────────────────────
+vertices = np.array([
+    [0,   0,   0 ],  # i0: bottom front left
+    [gx,  0,   0 ],  # i1: bottom front right
+    [gx,  gy,  0 ],  # i2: bottom back right (hidden from default view)
+    [0,   gy,  0 ],  # i3: bottom back left
+    [0,   0,   gz],  # i4: top front left
+    [gx,  0,   gz],  # i5: top front right
+    [gx,  gy,  gz],  # i6: top back right
+    [0,   gy,  gz],  # i7: top back left
+])
+edges = [
+    [3, 0], [0, 1], [1, 5], [5, 6],
+    [6, 7], [7, 4], [4, 5], [7, 3], [4, 0]
+]
 
-def clean_ax(ax):
-    ax.set_axis_off()
+def draw_bbox(ax):
+    for e in edges:
+        v1, v2 = vertices[e[0]], vertices[e[1]]
+        ax.plot([v1[0], v2[0]], [v1[1], v2[1]], [v1[2], v2[2]],
+                color='black', linewidth=1, zorder=3)
 
-def plot_bbox(ax, top_data, front_data, side_data, vmax_top, vmax_front, vmax_side):
+# ── box panel plotter ─────────────────────────────────────────────────────────
+def plot_bbox(ax, top_data, front_data, side_data, vmax, cmap):
     """
-    Render three bounding-box faces on a 3-D axes (full resolution).
+    Render three boundary faces of the domain using contourf + zdir.
 
-    Faces:
-      top   – XY plane at z = gz  (physical top of domain, z index -1)
-      front – XZ plane at y = 0   (index  0 along y)
-      side  – YZ plane at x = 0   (index  0 along x)
+    top   – XY plane at z = gz  (z index -1): contourf zdir='z'
+    front – XZ plane at y = 0   (y index  0): contourf zdir='y'
+    side  – YZ plane at x = 0   (x index  0): contourf zdir='x'
     """
-    # z_wall extends to gz so the wall faces are flush with the top face
-    z_wall = np.linspace(0, gz, Nz)
+    ax.computed_zorder = False
+    kw = dict(levels=num_contours, vmin=-vmax, vmax=vmax, cmap=cmap, zorder=1)
 
-    # front face ── XZ plane at y = 0
-    Xf, Zf = np.meshgrid(x, z_wall)
-    Yf = np.zeros_like(Xf)
-    ax.plot_surface(Xf, Yf, Zf,
-                    facecolors=face_rgba(front_data, vmax_front),
-                    shade=False, rcount=Nz, ccount=Nx)
+    # top face: XY at z = gz
+    ax.contourf(X_xy, Y_xy, top_data,
+                zdir='z', offset=gz, **kw)
 
-    # side face ─── YZ plane at x = 0
-    Ys, Zs = np.meshgrid(y, z_wall)
-    Xs = np.zeros_like(Ys)
-    ax.plot_surface(Xs, Ys, Zs,
-                    facecolors=face_rgba(side_data, vmax_side),
-                    shade=False, rcount=Nz, ccount=Ny)
+    # front face: XZ at y = 0  (args: X, DATA, Z)
+    ax.contourf(X_xz, front_data, Z_xz,
+                zdir='y', offset=0, **kw)
 
-    # top face ─── XY plane at z = gz (plotted last so painter's algorithm keeps it on top)
-    Xt, Yt = np.meshgrid(x, y)
-    Zt = gz * np.ones_like(Xt)
-    ax.plot_surface(Xt, Yt, Zt,
-                    facecolors=face_rgba(top_data, vmax_top),
-                    shade=False, rcount=Ny, ccount=Nx)
+    # side face: YZ at x = 0  (args: DATA, Y, Z)
+    ax.contourf(side_data, Y_yz, Z_yz,
+                zdir='x', offset=0, **kw)
+
+    draw_bbox(ax)
 
     ax.set_xlim(0, gx)
     ax.set_ylim(0, gy)
     ax.set_zlim(0, gz)
-    ax.set_box_aspect((4, 4, 1))   # match domain proportions: 4π × 4π × π
-    ax.view_init(elev=35, azim=225)
-    clean_ax(ax)
+    ax.set_box_aspect((gx/gz, gy/gz, 1), zoom=0.95)
+    ax.view_init(25, 240, 0)
+    ax.set_xlabel(r'$x$', labelpad=-5,  fontsize=FONT_LABEL)
+    ax.set_ylabel(r'$y$', labelpad=-15, fontsize=FONT_LABEL)
+    ax.set_zlabel(r'$z$', labelpad=-15, fontsize=FONT_LABEL)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
 
-# ── single figure: vorticity (left) and uz (right) ───────────────────────────
-fig = plt.figure(figsize=(18, 8))
+# ── figure ────────────────────────────────────────────────────────────────────
+CMAP_VORT = 'RdBu_r'
+CMAP_UZ   = 'PuOr'
+
+fig = plt.figure(figsize=(16, 7))
 fig.patch.set_facecolor('white')
+fig.subplots_adjust(left=0.01, right=0.99, top=0.97, bottom=0.12, wspace=0.05)
 
 ax_v = fig.add_subplot(121, projection='3d')
 ax_u = fig.add_subplot(122, projection='3d')
 
-# vorticity bounding box — all faces share the same colour scale
+# vorticity box: ω_z on top, ω_y on front, ω_x on side
 plot_bbox(ax_v,
-          wz[ptstp, -1, :, :],   # top  (z = gz): ω_z
-          wy[ptstp, :,  0, :],   # front (y = 0): ω_y
-          wx[ptstp, :,  :, 0],   # side  (x = 0): ω_x
-          wmax, wmax, wmax)
-ax_v.set_title('Vorticity', pad=10)
+          wz_top, wy_front, wx_side,
+          wmax, CMAP_VORT)
 
-# uz bounding box
+# uz box
 plot_bbox(ax_u,
-          uz[ptstp, -1, :, :],
-          uz[ptstp, :,  0, :],
-          uz[ptstp, :,  :, 0],
-          uzmax, uzmax, uzmax)
-ax_u.set_title(r'$u_z$', pad=10)
+          uz_top, uz_front, uz_side,
+          uzmax, CMAP_UZ)
 
-# ── colorbars ─────────────────────────────────────────────────────────────────
-# vorticity: single shared colorbar (between the two subplots)
-cax_v = fig.add_axes([0.50, 0.20, 0.012, 0.55])
-sm_v = plt.cm.ScalarMappable(cmap=cmap_obj,
+# ── colorbars (horizontal, below each subplot) ────────────────────────────────
+cax_v = fig.add_axes([0.06, 0.06, 0.38, 0.03])
+sm_v = plt.cm.ScalarMappable(cmap=CMAP_VORT,
                               norm=colors.Normalize(vmin=-wmax, vmax=wmax))
-fig.colorbar(sm_v, cax=cax_v, label=r'$\omega$')
+cb_v = fig.colorbar(sm_v, cax=cax_v, orientation='horizontal')
+cb_v.ax.tick_params(labelsize=FONT_TICK)
+cb_v.set_label(r'$\omega_z$', fontsize=FONT_LABEL)
 
-# uz: single colorbar to the right of the right subplot
-cax_u = fig.add_axes([0.92, 0.20, 0.012, 0.55])
-sm_uz = plt.cm.ScalarMappable(cmap=cmap_obj,
+cax_u = fig.add_axes([0.56, 0.06, 0.38, 0.03])
+sm_uz = plt.cm.ScalarMappable(cmap=CMAP_UZ,
                                norm=colors.Normalize(vmin=-uzmax, vmax=uzmax))
-fig.colorbar(sm_uz, cax=cax_u, label=r'$u_z$')
+cb_u = fig.colorbar(sm_uz, cax=cax_u, orientation='horizontal')
+cb_u.ax.tick_params(labelsize=FONT_TICK)
+cb_u.set_label(r'$w$', fontsize=FONT_LABEL)
+
+fig.tight_layout()
 
 plt.savefig('simdat_3dbbox.png', dpi=800, bbox_inches='tight')
 plt.savefig('simdat_3dbbox.pdf', bbox_inches='tight')

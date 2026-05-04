@@ -32,8 +32,9 @@ set multiplot layout 3,1 columnsfirst
 # idx 2: Re600_Pe60, steady
 # idx 3: Re1000_Pe10, steady
 # idx 4: Re1000_Pe100, steady
-# idx 5: Re600_Pe60, stoch
-# idx 6: Re1000_Pe100, stoch
+# idx 5: Re600_Pe600, steady
+# idx 6: Re600_Pe60, stoch
+# idx 7: Re1000_Pe100, stoch
 
 # }}}
 
@@ -46,21 +47,25 @@ perform_block_1 = 0
 if (perform_block_1) {
 
 
-set xlabel "Re_{B, eff}"
-set key top left
-set ylabel "VTurb"
-set title "Effective Re_B v VTurb"
-set log x
-set yrange [0:1]
+set xlabel "Re_{B}^*"
+set key bottom left
+set ylabel "VLam"
+#set title "EffecRe_B v VTurb"
+set log xy
+set yrange [0.1:1]
 
 plot "tavg_bflux.dat" \
-   i 0 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "blue" title 'Steady (300,30)',\
-"" i 1 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "red" title 'Steady (600,30)',\
-"" i 2 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "black" title 'Steady (600,60)',\
-"" i 3 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "purple" title 'Steady (1000,10)',\
-"" i 4 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "forest-green" title 'Steady (1000,100)',\
-"" i 5 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch (600,60)',\
-"" i 6 u (($30**3)*$1/$3):20:($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "forest-green" title 'Stoch (1000,100)'
+   i 0 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "blue" title 'Steady (300,30)',\
+"" i 1 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "red" title 'Steady (600,30)',\
+"" i 2 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "black" title 'Steady (600,60)',\
+"" i 3 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "purple" title 'Steady (1000,10)',\
+"" i 4 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "forest-green" title 'Steady (1000,100)',\
+"" i 5 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "#CC79A7" title 'Steady (600,600)',\
+"" i 6 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch (600,60)',\
+"" i 7 u (($30**3)*$1/$3):(1-$20):($31*3*($30**2)*$1/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "forest-green" title 'Stoch (1000,100)',\
+0.8*(x/100.)**(-0.25) w l lw 2 dt 2 title "Re_G^(-0.25)"
+#[0.01:1] 0.05*(x/100)**4 w l lw 2 dt 4 title "Re_G^4"
+
 
 } # end of block 1 }}}
 
@@ -73,11 +78,10 @@ perform_block_2 = 1
 if (perform_block_2) {
 
 set xlabel "Re_{G}"
-set key top left
+set key bottom right
 set ylabel "VTurb"
-#set title "Effective Re_B v VTurb"
-set log x
-set yrange [0:1]
+set log xy
+set yrange [0.001:1]
 
 plot "tavg_bflux.dat" \
    i 0 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "blue" title 'Steady (300,30)',\
@@ -85,8 +89,13 @@ plot "tavg_bflux.dat" \
 "" i 2 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "black" title 'Steady (600,60)',\
 "" i 3 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "purple" title 'Steady (1000,10)',\
 "" i 4 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "forest-green" title 'Steady (1000,100)',\
-"" i 5 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch (600,60)',\
-"" i 6 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "forest-green" title 'Stoch (1000,100)'
+"" i 5 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "#CC79A7" title 'Steady (600,600)',\
+"" i 6 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch (600,60)',\
+"" i 7 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "forest-green" title 'Stoch (1000,100)',\
+(x**4.)/(10 + x**4 + x**(15./4)) w l lw 2 dt 2 lc rgb "black"
+#1 - x**(-0.25) w l lw 2 dt 2 title "1 - Re_G^(-0.25)",\
+#[0.01:1] 0.05*x**4 w l lw 2 dt 4 title "Re_G^4"
+
 
 
 } # end of block 2 }}}

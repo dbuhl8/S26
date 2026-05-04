@@ -239,8 +239,9 @@ def main():
         (2, 'Steady (600,60)',   DARK_BLUE, 'o'),
         (3, 'Steady (1000,10)',  VERMILLION,'o'),
         (4, 'Steady (1000,100)', GREEN,     'o'),
-        (5, 'Stoch (600,60)',    DARK_BLUE, '^'),
-        (6, 'Stoch (1000,100)', GREEN,     '^'),
+        (5, 'Steady (600,600)', PINK,      'o'),
+        (6, 'Stoch (600,60)',    DARK_BLUE, 'D'),
+        (7, 'Stoch (1000,100)', GREEN,     'D'),
     ]
 
     # ── Fr* panels ──────────────────────────────────────────────────────────

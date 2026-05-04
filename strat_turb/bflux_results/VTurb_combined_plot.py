@@ -18,12 +18,7 @@ FONT_LABEL = 24
 FONT_TICK  = 18
 FONT_LEG   = 14
 
-# VTurb thresholds for the two fit regions
-FIT_VTURB_MIN = 0.01
-FIT_VTURB_MID = 0.65   # boundary between kick-up and taper regions
-
-FIT_COLOR_KICKUP = 'k'
-FIT_COLOR_TAPER  = '#AA3377'   # muted rose (Paul Tol qualitative palette)
+FIT_COLOR = 'k'
 
 
 def load_dat_blocks(filepath):
@@ -59,39 +54,19 @@ def compute_xerr_Reb(block):
     return uh_err * 3 * (uh**2) * Re / B
 
 def compute_x_ReG(block):
-    return block[:, 17] / block[:, 2]          # mdisp / B
+    return block[:, 17] / block[:, 2]
 
 def compute_xerr_ReG(block):
-    return block[:, 18] / block[:, 2]          # mdisp_err / B
-
-
-# ── logarithmic fit over a VTurb sub-range ───────────────────────────────────
-
-def fit_region(blocks, datasets, x_fn, vturb_lo, vturb_hi):
-    """Fit VTurb = a*ln(x) + b for points with VTurb in [vturb_lo, vturb_hi].
-    Returns (a, b, x_min, x_max) or None if fewer than 2 points qualify."""
-    xs, ys = [], []
-    for idx, *_ in datasets:
-        block = blocks[idx]
-        x = x_fn(block)
-        y = block[:, 19]
-        mask = (np.isfinite(x) & np.isfinite(y) & (x > 0)
-                & (y >= vturb_lo) & (y <= vturb_hi))
-        xs.append(x[mask])
-        ys.append(y[mask])
-    xs = np.concatenate(xs)
-    ys = np.concatenate(ys)
-    if len(xs) < 2:
-        return None
-    a, b = np.polyfit(np.log(xs), ys, 1)
-    return a, b, xs.min(), xs.max()
+    return block[:, 18] / block[:, 2]
 
 
 # ── panel plotter ─────────────────────────────────────────────────────────────
 
 def plot_panel(ax, blocks, datasets, x_fn, x_err_fn,
-               xlabel, x_sym, show_ylabel, kickup_vmin=None):
-
+               xlabel, show_ylabel, x_power, legend_label=None, x_scale=1.0):
+    """
+    x_power = -0.25  for both panels → plots VTurb = 1 - (x/x_scale)^{-1/4}
+    """
     for idx, label, color, marker in datasets:
         block = blocks[idx]
         x    = x_fn(block)
@@ -113,54 +88,21 @@ def plot_panel(ax, blocks, datasets, x_fn, x_err_fn,
     if show_ylabel:
         ax.set_ylabel(r'$V_\mathrm{Turb}$', fontsize=FONT_LABEL)
 
-    # ── kick-up fit ──────────────────────────────────────────────────────────
-    vmin_k = kickup_vmin if kickup_vmin is not None else FIT_VTURB_MIN
-    res_k = fit_region(blocks, datasets, x_fn, vmin_k, FIT_VTURB_MID)
-    res_t = fit_region(blocks, datasets, x_fn, FIT_VTURB_MID, 1.05)
+    # ── theory curve: VTurb = 1 - x^x_power ─────────────────────────────────
+    xs = []
+    for idx, *_ in datasets:
+        block = blocks[idx]
+        x = x_fn(block)
+        mask = np.isfinite(x) & (x > 0)
+        xs.append(x[mask])
+    xs = np.concatenate(xs)
 
-    # Determine non-overlapping x extents
-    if res_k is not None and res_t is not None:
-        a_k, b_k, x_lo_k, x_hi_k = res_k
-        a_t, b_t, x_lo_t, x_hi_t = res_t
-        if x_lo_t >= x_hi_k:
-            x_end_k, x_start_t = x_hi_k, x_lo_t
-        else:
-            # Ranges overlap — split at the log-midpoint
-            x_split = 10 ** ((np.log10(x_lo_t) + np.log10(x_hi_k)) / 2)
-            x_end_k, x_start_t = x_split, x_split
-    elif res_k is not None:
-        a_k, b_k, x_lo_k, x_hi_k = res_k
-        x_end_k = x_hi_k
-    elif res_t is not None:
-        a_t, b_t, x_lo_t, x_hi_t = res_t
-        x_start_t = x_lo_t
-
-    fit_handles, fit_labels = [], []
-
-    if res_k is not None:
-        x_line = np.logspace(np.log10(x_lo_k), np.log10(x_end_k), 300)
-        h, = ax.plot(x_line, a_k * np.log(x_line) + b_k,
-                     '--', color=FIT_COLOR_KICKUP, linewidth=2.0, zorder=5,
-                     label='_nolegend_')
-        fit_handles.append(h)
-        fit_labels.append(fr'$\propto {a_k:.2f}\ln({x_sym})$')
-        print(f"  kick-up {xlabel}: a = {a_k:.4f},  b = {b_k:.4f}")
-
-    if res_t is not None:
-        x_line = np.logspace(np.log10(x_start_t), np.log10(x_hi_t), 300)
-        h, = ax.plot(x_line, a_t * np.log(x_line) + b_t,
-                     '--', color=FIT_COLOR_TAPER, linewidth=2.0, zorder=5,
-                     label='_nolegend_')
-        fit_handles.append(h)
-        fit_labels.append(fr'$\propto {a_t:.2f}\ln({x_sym})$')
-        print(f"  taper   {xlabel}: a = {a_t:.4f},  b = {b_t:.4f}")
-
-    if res_k is not None and res_t is not None:
-        ReG_crit = np.exp((b_t - b_k) / (a_k - a_t))
-        print(f"  critical {xlabel}: {xlabel} = {ReG_crit:.4g}  (kick-up / taper intersection)")
-
-    if fit_handles:
-        ax.legend(handles=fit_handles, labels=fit_labels,
+    if len(xs) >= 2:
+        x_line = np.logspace(np.log10(xs.min()), np.log10(xs.max()), 300)
+        y_line = 1.0 - (x_line / x_scale) ** x_power
+        h, = ax.plot(x_line, y_line, '--', color=FIT_COLOR, linewidth=2.0, zorder=5)
+        lbl = legend_label if legend_label is not None else r'$1 - Re_G/Re_B^{*\,1/4}$'
+        ax.legend([h], [lbl],
                   loc='upper left', fontsize=FONT_LEG,
                   frameon=True, framealpha=0.85)
 
@@ -173,25 +115,30 @@ def main():
         (2, 'Steady (600,60)',   DARK_BLUE, 'o'),
         (3, 'Steady (1000,10)',  VERMILLION,'o'),
         (4, 'Steady (1000,100)', GREEN,     'o'),
-        (5, 'Stoch (600,60)',    DARK_BLUE, '^'),
-        (6, 'Stoch (1000,100)', GREEN,     '^'),
+        (5, 'Steady (600,600)', PINK,      'o'),
+        (6, 'Stoch (600,60)',    DARK_BLUE, 'D'),
+        (7, 'Stoch (1000,100)', GREEN,     'D'),
     ]
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 6), sharey=True)
     fig.subplots_adjust(wspace=0.08, bottom=0.30)
 
-    print(f"Logarithmic fits (kick-up: VTurb in [{FIT_VTURB_MIN}, {FIT_VTURB_MID}],"
-          f" taper: VTurb in [{FIT_VTURB_MID}, 1.05]):")
+    print("Plotting theory curves (VTurb = 1 - x^{-1/4}):")
 
     plot_panel(axes[0], blocks, datasets,
                compute_x_Reb, compute_xerr_Reb,
-               xlabel=r'$Re_B^*$', x_sym=r'Re_B^*',
-               show_ylabel=True, kickup_vmin=0.05)
+               xlabel=r'$Re_B^*$',
+               show_ylabel=True,
+               x_power=-0.25,
+               legend_label=r'$1 - (Re_B^*/33)^{-1/4}$',
+               x_scale=33)
 
     plot_panel(axes[1], blocks, datasets,
                compute_x_ReG, compute_xerr_ReG,
-               xlabel=r'$Re_G$', x_sym=r'Re_G',
-               show_ylabel=False)
+               xlabel=r'$Re_G$',
+               show_ylabel=False,
+               x_power=-0.25,
+               legend_label=r'$1 - Re_G^{-1/4}$')
 
     # force every integer power of 10 to show on the ReG axis
     axes[1].xaxis.set_major_locator(LogLocator(base=10.0, subs=(1.0,), numticks=20))
