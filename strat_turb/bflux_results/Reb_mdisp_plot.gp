@@ -92,7 +92,7 @@ plot "tavg_bflux.dat" \
 "" i 5 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 7 ps 2 lc rgb "#CC79A7" title 'Steady (600,600)',\
 "" i 6 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "black" title 'Stoch (600,60)',\
 "" i 7 u ($18/$3):20:($19/$3):21 w xyerrorbars pt 9 ps 2 lc rgb "forest-green" title 'Stoch (1000,100)',\
-(x**4.)/(10 + x**4 + x**(15./4)) w l lw 2 dt 2 lc rgb "black"
+(x**4.)/(100 + x**4 + x**(15./4)) w l lw 2 dt 2 lc rgb "black"
 #1 - x**(-0.25) w l lw 2 dt 2 title "1 - Re_G^(-0.25)",\
 #[0.01:1] 0.05*x**4 w l lw 2 dt 4 title "Re_G^4"
 

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.lines import Line2D
+from scipy.optimize import nnls
 
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams['font.serif'] = ['Times New Roman']
@@ -99,6 +100,47 @@ def predict_bflux(Fr_eff_inv, VTurb, C_turb, C_lam):
     return VTurb * C_turb * Fr_eff_inv**(-2) + VLam * C_lam * Fr_eff_inv**(-2)
 
 
+# Forcing scales: L_F = 2pi (steady), sqrt(2)*pi (stochastic)
+L_F_STEADY = 2.0 * np.pi
+L_F_STOCH  = np.sqrt(2.0) * np.pi
+STOCH_INDICES = {6, 7}
+
+
+def fit_diffusion_coeffs(blocks, datasets):
+    """Fit cwturb, cwlam for D = (cwturb*vturb + cwlam*vlam) * Fr* * L_F
+    via non-negative least squares, where D_actual = tdisp/Pe."""
+    all_D, all_A, all_B = [], [], []
+    for idx, *_ in datasets:
+        block      = blocks[idx]
+        Fr_eff_inv = compute_Fr_eff_inv(block)
+        L_F        = L_F_STOCH if idx in STOCH_INDICES else L_F_STEADY
+        L          = L_F / Fr_eff_inv            # Fr* * L_F
+        vturb_vel  = block[:, 21]                # turb_uzrms (col 22)
+        vlam_vel   = block[:, 23]                # lam_uzrms  (col 24)
+        VTurb      = block[:, 19]
+        D_actual   = compute_bflux(block)
+        m = (valid_mask_bflux(Fr_eff_inv, VTurb, D_actual)
+             & np.isfinite(L) & (L > 0)
+             & np.isfinite(vturb_vel) & np.isfinite(vlam_vel))
+        all_D.append(D_actual[m])
+        all_A.append(vturb_vel[m] * L[m])
+        all_B.append(vlam_vel[m]  * L[m])
+    D_arr = np.concatenate(all_D)
+    X     = np.column_stack([np.concatenate(all_A), np.concatenate(all_B)])
+    coeffs, _ = nnls(X, D_arr)
+    return coeffs[0], coeffs[1]  # cwturb, cwlam
+
+
+def predict_diffusivity(block, idx, cwturb, cwlam):
+    """D_pred = (cwturb*vturb + cwlam*vlam) * Fr* * L_F"""
+    Fr_eff_inv = compute_Fr_eff_inv(block)
+    L_F        = L_F_STOCH if idx in STOCH_INDICES else L_F_STEADY
+    L          = L_F / Fr_eff_inv
+    vturb_vel  = block[:, 21]
+    vlam_vel   = block[:, 23]
+    return (cwturb * vturb_vel + cwlam * vlam_vel) * L
+
+
 def main():
     blocks   = load_dat_blocks('tavg_bflux.dat')
     datasets = [
@@ -107,8 +149,9 @@ def main():
         (2, 'Steady (600,60)',   DARK_BLUE, 'o'),
         (3, 'Steady (1000,10)',  VERMILLION,'o'),
         (4, 'Steady (1000,100)', GREEN,     'o'),
-        (5, 'Stoch (600,60)',    DARK_BLUE, '^'),
-        (6, 'Stoch (1000,100)', GREEN,     '^'),
+        (5, 'Steady (600,600)', PINK,      'o'),
+        (6, 'Stoch (600,60)',    DARK_BLUE, 'D'),
+        (7, 'Stoch (1000,100)', GREEN,     'D'),
     ]
 
     # Fit each amplitude from its own component, restricted to the regime where
@@ -122,11 +165,14 @@ def main():
     C_turb = a_w_turb * a_b_turb
     C_lam  = a_w_lam  * a_b_lam
 
+    cwturb, cwlam = fit_diffusion_coeffs(blocks, datasets)
+
     print(f"a_b_turb = {a_b_turb:.4e},  a_b_lam = {a_b_lam:.4e}")
     print(f"a_w_turb = {a_w_turb:.4e},  a_w_lam = {a_w_lam:.4e}")
     print(f"C_turb   = {C_turb:.4e},    C_lam   = {C_lam:.4e}")
+    print(f"cwturb   = {cwturb:.4e},    cwlam   = {cwlam:.4e}")
 
-    fig, ax = plt.subplots(figsize=(7, 6))
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
     all_pred, all_actual = [], []
     has_open = False
@@ -185,6 +231,67 @@ def main():
         handles.append(proxy)
         labels.append(r'open: $Re_G < 1$')
     ax.legend(handles, labels, fontsize=12, loc='upper left')
+
+    # --- subplot 2: predicted vs actual diffusivity D = w*L ---
+    all_D_pred, all_D_actual = [], []
+    has_open2 = False
+
+    for idx, label, color, marker in datasets:
+        block      = blocks[idx]
+        Fr_eff_inv = compute_Fr_eff_inv(block)
+        VTurb      = block[:, 19]
+        ReG        = block[:, 17] / block[:, 2]
+        D_actual   = compute_bflux(block)
+        D_err      = compute_bflux_err(block)
+        vturb_vel  = block[:, 21]
+        vlam_vel   = block[:, 23]
+        D_pred     = predict_diffusivity(block, idx, cwturb, cwlam)
+        m = (valid_mask_bflux(Fr_eff_inv, VTurb, D_actual)
+             & np.isfinite(D_pred) & (D_pred > 0)
+             & np.isfinite(vturb_vel) & np.isfinite(vlam_vel))
+        if not m.any():
+            continue
+
+        ReG_m = ReG[m]
+        hi    = ReG_m >= 1
+        lo    = ReG_m <  1
+
+        if hi.any():
+            ax2.errorbar(D_actual[m][hi], D_pred[m][hi], yerr=D_err[m][hi],
+                         fmt=marker, color=color, markersize=7,
+                         capsize=3, linestyle='none', label=label, zorder=3)
+        if lo.any():
+            ax2.errorbar(D_actual[m][lo], D_pred[m][lo], yerr=D_err[m][lo],
+                         fmt=marker, color=color, markersize=7,
+                         capsize=3, linestyle='none', zorder=3,
+                         markerfacecolor='none', markeredgewidth=1.5)
+            has_open2 = True
+
+        all_D_pred.append(D_pred[m])
+        all_D_actual.append(D_actual[m])
+
+    combined2 = np.concatenate(all_D_pred + all_D_actual)
+    combined2 = combined2[combined2 > 0]
+    ref2 = np.logspace(np.log10(combined2.min() * 0.8),
+                       np.log10(combined2.max() * 1.2), 200)
+    ax2.plot(ref2, ref2, 'k--', linewidth=1.5, label='1:1', zorder=2)
+
+    ax2.set_xscale('log')
+    ax2.set_yscale('log')
+    ax2.set_xlabel(r'$\langle wb \rangle$', fontsize=20)
+    ax2.set_ylabel(r'$D_\mathrm{pred} = \tilde{w}\,\tilde{L}$', fontsize=20)
+    ax2.tick_params(labelsize=15)
+    ax2.set_aspect('equal', adjustable='datalim')
+
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    if has_open2:
+        proxy2 = Line2D([0], [0], marker='o', color='dimgray',
+                        markerfacecolor='none', markeredgewidth=1.5,
+                        markersize=8, linestyle='none',
+                        label=r'open: $Re_G < 1$')
+        handles2.append(proxy2)
+        labels2.append(r'open: $Re_G < 1$')
+    ax2.legend(handles2, labels2, fontsize=12, loc='upper left')
 
     fig.tight_layout()
     fig.savefig('bflux_reconstruction.pdf')
